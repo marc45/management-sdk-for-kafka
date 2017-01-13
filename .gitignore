@@ -1,0 +1,7 @@
+.DS_Store
+target/
+artifacts/
+management-service-tmp/
+.idea/
+*.iml
+databus-mgmt-svc.log
