@@ -1,0 +1,5 @@
+[gerrit]
+host=git-amr-3.devtools.intel.com
+port=29418
+project=databus-management-sdk
+defaultbranch=master
