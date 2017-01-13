@@ -12,7 +12,7 @@ public final class Topic {
      * @param configuration
      */
     public void addConfiguration(final Map<String, String> configuration) {
-        return;
+        return; 
 
     }
 
