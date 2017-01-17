@@ -28,30 +28,30 @@
 <suppressions>
 
     <suppress checks="Javadoc.*"
-              files="com[\\/]intel[\\/]databus[\\/]mgmtsdk[\\/]"/>
+              files="com[\\/]intel[\\/]databus[\\/]operations[\\/]"/>
 
     <suppress checks="whitespace.*"
-              files="com[\\/]intel[\\/]databus[\\/]mgmtsdk[\\/]"/>
+              files="com[\\/]intel[\\/]databus[\\/]operations[\\/]"/>
 
     <suppress checks="AvoidInlineConditionalsCheck"
-              files="com[\\/]intel[\\/]databus[\\/]mgmtsdk[\\/]"/>
+              files="com[\\/]intel[\\/]databus[\\/]operations[\\/]"/>
 
     <suppress checks="HiddenFieldCheck"
-              files="com[\\/]intel[\\/]databus[\\/]mgmtsdk[\\/]"/>
+              files="com[\\/]intel[\\/]databus[\\/]operations[\\/]"/>
 
     <suppress checks="JavadocMethodCheck"
-              files="com[\\/]intel[\\/]databus[\\/]mgmtsdk[\\/]"/>
+              files="com[\\/]intel[\\/]databus[\\/]operations[\\/]"/>
 
     <suppress checks="JavadocPackageCheck"
-              files="com[\\/]intel[\\/]databus[\\/]mgmtsdk[\\/]"/>
+              files="com[\\/]intel[\\/]databus[\\/]operations[\\/]"/>
 
     <suppress checks="JavadocTypeCheck"
-              files="com[\\/]intel[\\/]databus[\\/]mgmtsdk[\\/]"/>
+              files="com[\\/]intel[\\/]databus[\\/]operations[\\/]"/>
 
     <suppress checks="JavadocVariableCheck"
-              files="com[\\/]intel[\\/]databus[\\/]mgmtsdk[\\/]"/>
+              files="com[\\/]intel[\\/]databus[\\/]operations[\\/]"/>
 
     <suppress checks="DesignForExtension"
-              files="com[\\/]intel[\\/]databus[\\/]mgmtsdk[\\/]"/>
+              files="com[\\/]intel[\\/]databus[\\/]operations[\\/]"/>
 
 </suppressions>
