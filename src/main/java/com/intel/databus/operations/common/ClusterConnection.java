@@ -73,7 +73,7 @@ public class ClusterConnection {
      * @param zkServers It's a comma-separated list of zookeeper servers host:port
      * @param connectionTimeoutMS connection timeout in milliseconds
      * @param sessionTimeoutMS session timeout in milliseconds
-     * @return
+     * @return Zookeeper client
      */
     protected ZkClient getZKClient(final String zkServers, final String connectionTimeoutMS, final String sessionTimeoutMS) {
         try {

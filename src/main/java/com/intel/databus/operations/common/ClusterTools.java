@@ -30,9 +30,9 @@ public class ClusterTools {
     /**
      * Read topic configuration
      *
-     * @param connection
-     * @param topicName
-     * @return
+     * @param connection connection
+     * @param topicName topic name
+     * @return topic properties
      */
     public Properties fetchEntityConfig(final ZkUtils connection, final String topicName) {
         try {

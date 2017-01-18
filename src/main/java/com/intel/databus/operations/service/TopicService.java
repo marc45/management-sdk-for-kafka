@@ -18,7 +18,7 @@ public class TopicService implements AutoCloseable {
     private final ClusterTools clusterTools;
 
     /**
-     * @param topicServiceConfiguration
+     * @param topicServiceConfiguration topic service configuration
      */
     public TopicService(final Map<String, String> topicServiceConfiguration) {
         this.configuration = topicServiceConfiguration;
@@ -26,7 +26,9 @@ public class TopicService implements AutoCloseable {
     }
 
     /**
-     * @param topicProperties
+     * Add topic properties
+     * @param topicName topic name
+     * @param topicProperties topic properties
      */
     public void addTopicProperties(final String topicName,
                                    final Properties topicProperties) {
@@ -45,8 +47,8 @@ public class TopicService implements AutoCloseable {
     }
 
     /**
-     * @param topicName
-     * @return
+     * @param topicName topic name
+     * @return topic properties
      */
     public Properties getTopicProperties(final String topicName) {
         return clusterTools.fetchEntityConfig(getConnection(), topicName);
@@ -54,7 +56,7 @@ public class TopicService implements AutoCloseable {
 
 
     /**
-     * @return
+     * @return Zookeeper connection
      */
     private ZkUtils getConnection() {
 
