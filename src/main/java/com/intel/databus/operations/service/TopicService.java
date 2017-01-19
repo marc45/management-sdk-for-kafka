@@ -54,7 +54,7 @@ public class TopicService implements AutoCloseable {
     public void addTopicProperties(final String topicName,
                                    final Properties topicProperties) {
 
-        clusterTools.changeTopicConfig(getConnection(), topicName, topicProperties);
+        clusterTools.addTopicConfig(getConnection(), topicName, topicProperties);
     }
 
     /**
@@ -72,7 +72,7 @@ public class TopicService implements AutoCloseable {
      * @return topic properties
      */
     public Properties getTopicProperties(final String topicName) {
-        return clusterTools.fetchEntityConfig(getConnection(), topicName);
+        return clusterTools.getTopicConfig(getConnection(), topicName);
     }
 
 

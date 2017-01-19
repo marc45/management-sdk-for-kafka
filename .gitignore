@@ -1,6 +1,7 @@
 .DS_Store
 target/
 artifacts/
+javadoc/
 management-service-tmp/
 .idea/
 *.iml

@@ -22,6 +22,7 @@
 package com.intel.databus.operations.common;
 
 import com.intel.databus.operations.exception.TopicOperationException;
+import kafka.admin.AdminOperationException;
 import kafka.admin.AdminUtils;
 import kafka.server.ConfigType;
 import kafka.utils.ZkUtils;
@@ -40,25 +41,25 @@ public class ClusterTools {
      * @param topicName topic name
      * @param configs topic properties
      */
-    public void changeTopicConfig(final ZkUtils connection, final String topicName, final Properties configs) {
+    public void addTopicConfig(final ZkUtils connection, final String topicName, final Properties configs) {
         try {
-            AdminUtils.changeTopicConfig(connection,topicName,configs);
-        } catch (Exception e) {
+            AdminUtils.changeTopicConfig(connection, topicName, configs);
+        } catch (AdminOperationException e) {
             throw new TopicOperationException(topicName, e.getMessage(),e,this.getClass());
         }
     }
 
     /**
-     * Read topic configuration
+     * Get topic configuration
      *
      * @param connection connection
      * @param topicName topic name
      * @return topic properties
      */
-    public Properties fetchEntityConfig(final ZkUtils connection, final String topicName) {
+    public Properties getTopicConfig(final ZkUtils connection, final String topicName) {
         try {
             return AdminUtils.fetchEntityConfig(connection, ConfigType.Topic(),topicName);
-        } catch (Exception e) {
+        } catch (IllegalArgumentException e) {
             throw new TopicOperationException(topicName, e.getMessage(),e,this.getClass());
         }
     }

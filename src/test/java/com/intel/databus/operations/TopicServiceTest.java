@@ -72,11 +72,11 @@ public class TopicServiceTest {
 
         ClusterTools clusterToolsMock = new ClusterTools() {
             @Override
-            public void changeTopicConfig(ZkUtils connection , String topicName, Properties configs) {
+            public void addTopicConfig(ZkUtils connection , String topicName, Properties configs) {
             }
 
             @Override
-            public Properties fetchEntityConfig(ZkUtils connection , String topicName) {
+            public Properties getTopicConfig(ZkUtils connection , String topicName) {
                 return null;
             }
 
@@ -104,17 +104,17 @@ public class TopicServiceTest {
 
 
     @Test
-    public void when_I_add_topic_property_then_I_was_able_to_read_the_same_topic_property_vale()
+    public void when_I_add_topic_property_then_I_was_able_to_read_then_same_topic_property_vale()
             {
 
         // Given
         ClusterTools clusterToolsMock = new ClusterTools() {
             @Override
-            public void changeTopicConfig(ZkUtils connection , String topicName, Properties configs) {
+            public void addTopicConfig(ZkUtils connection , String topicName, Properties configs) {
 
             }
             @Override
-            public Properties fetchEntityConfig(ZkUtils connection , String topicName) {
+            public Properties getTopicConfig(ZkUtils connection , String topicName) {
                 Properties props = new Properties();
                 props.setProperty("max.message.bytes","40000");
                 return props;
@@ -153,7 +153,7 @@ public class TopicServiceTest {
 
         ClusterTools clusterToolsMock = new ClusterTools() {
             @Override
-            public void changeTopicConfig(ZkUtils connection , String topicName, Properties configs) {
+            public void addTopicConfig(ZkUtils connection , String topicName, Properties configs) {
                 throw new TopicOperationException(topicName,"Topic " + topicName + " does not exist.",null,this.getClass());
             }
         };
@@ -179,7 +179,7 @@ public class TopicServiceTest {
 
 
     @Test
-    public void when_zkservers_is_not_configured_the_thows_exception()  {
+    public void when_zkservers_is_not_configured_then_thows_exception()  {
 
         // Given
         String topicName = "topic1-group0";
@@ -205,7 +205,7 @@ public class TopicServiceTest {
     }
 
     @Test
-    public void when_session_timeout_is_ill_configured_the_thows_exception()  {
+    public void when_session_timeout_is_ill_configured_then_thows_exception()  {
 
         // Given
         String topicName = "topic1-group0";
@@ -236,7 +236,7 @@ public class TopicServiceTest {
 
 
     @Test
-    public void when_connection_timeout_is_ill_configured_the_thows_exception()  {
+    public void when_connection_timeout_is_ill_configured_then_thows_exception()  {
 
         // Given
         String topicName = "topic1-group0";
