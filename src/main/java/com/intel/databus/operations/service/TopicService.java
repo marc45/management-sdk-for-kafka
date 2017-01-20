@@ -47,14 +47,14 @@ public class TopicService implements AutoCloseable {
     }
 
     /**
-     * Add topic properties
+     * Override topic properties.
      * @param topicName topic name
      * @param topicProperties topic properties
      */
-    public void addTopicProperties(final String topicName,
-                                   final Properties topicProperties) {
+    public void overrideTopicProperties(final String topicName,
+                                        final Properties topicProperties) {
 
-        clusterTools.addTopicConfig(getConnection(), topicName, topicProperties);
+        clusterTools.overrideTopicProperties(getConnection(), topicName, topicProperties);
     }
 
     /**
@@ -72,7 +72,7 @@ public class TopicService implements AutoCloseable {
      * @return topic properties
      */
     public Properties getTopicProperties(final String topicName) {
-        return clusterTools.getTopicConfig(getConnection(), topicName);
+        return clusterTools.getTopicProperties(getConnection(), topicName);
     }
 
 

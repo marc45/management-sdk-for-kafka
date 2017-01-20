@@ -72,11 +72,11 @@ public class TopicServiceTest {
 
         ClusterTools clusterToolsMock = new ClusterTools() {
             @Override
-            public void addTopicConfig(ZkUtils connection , String topicName, Properties configs) {
+            public void overrideTopicProperties(ZkUtils connection , String topicName, Properties configs) {
             }
 
             @Override
-            public Properties getTopicConfig(ZkUtils connection , String topicName) {
+            public Properties getTopicProperties(ZkUtils connection , String topicName) {
                 return null;
             }
 
@@ -110,11 +110,11 @@ public class TopicServiceTest {
         // Given
         ClusterTools clusterToolsMock = new ClusterTools() {
             @Override
-            public void addTopicConfig(ZkUtils connection , String topicName, Properties configs) {
+            public void overrideTopicProperties(ZkUtils connection , String topicName, Properties configs) {
 
             }
             @Override
-            public Properties getTopicConfig(ZkUtils connection , String topicName) {
+            public Properties getTopicProperties(ZkUtils connection , String topicName) {
                 Properties props = new Properties();
                 props.setProperty("max.message.bytes","40000");
                 return props;
@@ -128,7 +128,7 @@ public class TopicServiceTest {
 
         try {
             // When
-            topicService.addTopicProperties(topicName,properties);
+            topicService.overrideTopicProperties(topicName,properties);
 
             // Then
             final Properties topicProperties = topicService.getTopicProperties(topicName);
@@ -153,7 +153,7 @@ public class TopicServiceTest {
 
         ClusterTools clusterToolsMock = new ClusterTools() {
             @Override
-            public void addTopicConfig(ZkUtils connection , String topicName, Properties configs) {
+            public void overrideTopicProperties(ZkUtils connection , String topicName, Properties configs) {
                 throw new TopicOperationException(topicName,"Topic " + topicName + " does not exist.",null,this.getClass());
             }
         };
@@ -161,7 +161,7 @@ public class TopicServiceTest {
 
         try {
             // When
-            topicService.addTopicProperties(topicName,properties);
+            topicService.overrideTopicProperties(topicName,properties);
             fail();
         }
         catch (TopicOperationException e) {
@@ -190,7 +190,7 @@ public class TopicServiceTest {
 
         try {
             // When
-            topicService.addTopicProperties(topicName, properties);
+            topicService.overrideTopicProperties(topicName, properties);
             fail();
         }
         catch(ConnectionException e) {
@@ -220,7 +220,7 @@ public class TopicServiceTest {
 
         try {
             // When
-            topicService.addTopicProperties(topicName, properties);
+            topicService.overrideTopicProperties(topicName, properties);
             fail();
         }
         catch(ConnectionException e) {
@@ -251,7 +251,7 @@ public class TopicServiceTest {
 
         try {
             // When
-            topicService.addTopicProperties(topicName, properties);
+            topicService.overrideTopicProperties(topicName, properties);
             fail();
         }
         catch(ConnectionException e) {
@@ -266,24 +266,25 @@ public class TopicServiceTest {
     }
 
 
-    //@Test
+    // @Test
     public void test() {
 
         // Given
-        String topicName = "topic2-group0";
+        String topicName = "topic1-group0";
         String propertyKey = "max.message.bytes";
         String propertyValue = "0";
 
         Properties properties = new Properties();
-        properties.setProperty(propertyKey,propertyValue);
+//        properties.setProperty(propertyKey,propertyValue);
 
         try {
             // Given
             Map<String, String> config = new HashMap<>();
+            config.put(ClusterPropertyName.ZKSERVERS.getPropertyName(),"zookeeper-1:2181");
             TopicService topicService = new TopicService(config);
 
             // When
-            topicService.addTopicProperties(topicName,properties);
+            topicService.overrideTopicProperties(topicName,properties);
 
             // Then
             final Properties topicProperties = topicService.getTopicProperties(topicName);

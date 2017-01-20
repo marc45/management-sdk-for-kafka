@@ -35,13 +35,13 @@ import java.util.Properties;
 public class ClusterTools {
 
     /**
-     * Change topic configuration
+     * Override topic configuration
      *
      * @param connection zookeeper util API
      * @param topicName topic name
      * @param configs topic properties
      */
-    public void addTopicConfig(final ZkUtils connection, final String topicName, final Properties configs) {
+    public void overrideTopicProperties(final ZkUtils connection, final String topicName, final Properties configs) {
         try {
             AdminUtils.changeTopicConfig(connection, topicName, configs);
         } catch (AdminOperationException e) {
@@ -56,7 +56,7 @@ public class ClusterTools {
      * @param topicName topic name
      * @return topic properties
      */
-    public Properties getTopicConfig(final ZkUtils connection, final String topicName) {
+    public Properties getTopicProperties(final ZkUtils connection, final String topicName) {
         try {
             return AdminUtils.fetchEntityConfig(connection, ConfigType.Topic(),topicName);
         } catch (IllegalArgumentException e) {
