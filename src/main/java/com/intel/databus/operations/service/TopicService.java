@@ -83,9 +83,7 @@ public class TopicService implements AutoCloseable {
 
         final ClusterConnection connection;
 
-        if (this.connection != null) {
-            connection = this.connection;
-        } else {
+        if (this.connection == null) {
 
             String zkServers = configuration.getOrDefault(ClusterPropertyName.ZKSERVERS.getPropertyName(), null);
 
@@ -95,10 +93,9 @@ public class TopicService implements AutoCloseable {
             String sessionTimeoutMS = configuration.getOrDefault(ClusterPropertyName.ZK_SESSION_TIMEOUT_MS.getPropertyName(),
                     ClusterPropertyName.ZK_SESSION_TIMEOUT_MS.getDefaultValue());
 
-            connection = new ClusterConnection(zkServers, connectionTimeoutMS, sessionTimeoutMS);
-
+            this.connection = new ClusterConnection(zkServers, connectionTimeoutMS, sessionTimeoutMS);
         }
 
-        return connection.getConnection();
+        return this.connection.getConnection();
     }
 }
