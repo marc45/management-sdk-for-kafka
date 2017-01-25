@@ -22,9 +22,11 @@
 package com.intel.databus.operations.service;
 
 import com.intel.databus.operations.common.ClusterConnection;
-import com.intel.databus.operations.common.ClusterTools;
 import com.intel.databus.operations.common.ClusterPropertyName;
+import com.intel.databus.operations.common.ClusterTools;
+import com.intel.databus.operations.exception.TopicOperationException;
 import kafka.utils.ZkUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.Map;
 import java.util.Properties;
@@ -48,14 +50,22 @@ public class TopicService implements AutoCloseable {
 
     /**
      * Override topic properties.
+     *
      * @param topicName topic name
      * @param topicProperties topic properties
+     * @throws IllegalArgumentException when topicName or topicProperties is empty or null.
+     * @throws com.intel.databus.operations.exception.TopicOperationException when topicName  does not exists
      */
     public void overrideTopicProperties(final String topicName,
                                         final Properties topicProperties) {
+        validateTopicName(topicName);
 
+        if (topicProperties == null) {
+            throw new IllegalArgumentException("Topic properties cannot be null");
+        }
         clusterTools.overrideTopicProperties(getConnection(), topicName, topicProperties);
     }
+
 
     /**
      * Close cluster connection
@@ -68,16 +78,27 @@ public class TopicService implements AutoCloseable {
     }
 
     /**
+     * Get Topic Properties
+     *
      * @param topicName topic name
      * @return topic properties
+     * @throws IllegalArgumentException when topicName is empty or null.
+     * @throws com.intel.databus.operations.exception.TopicOperationException when topicName does not exists
      */
     public Properties getTopicProperties(final String topicName) {
-        return clusterTools.getTopicProperties(getConnection(), topicName);
+        validateTopicName(topicName);
+        if( clusterTools.topicExists(getConnection(),topicName)) {
+            return clusterTools.getTopicProperties(getConnection(), topicName);
+        }
+        throw new TopicOperationException(topicName,"Topic "+topicName+ " does not exist",null,this.getClass());
     }
 
 
     /**
+     * Get a Zookeeper connection
+     *
      * @return Zookeeper connection
+     * @throws com.intel.databus.operations.exception.ConnectionException when Zookeeper connection failed
      */
     private ZkUtils getConnection() {
 
@@ -98,4 +119,18 @@ public class TopicService implements AutoCloseable {
 
         return this.connection.getConnection();
     }
+
+
+    /**
+     * Validate Topic Name.
+     *
+     * @param topicName Topic Name to be validated
+     * @throws IllegalArgumentException when topicName is empty or null
+     */
+    private void validateTopicName(final String topicName) {
+        if (StringUtils.isEmpty(topicName)) {
+            throw new IllegalArgumentException("Topic name cannot be null or empty");
+        }
+    }
+
 }

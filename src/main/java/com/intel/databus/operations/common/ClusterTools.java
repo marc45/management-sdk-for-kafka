@@ -64,4 +64,15 @@ public class ClusterTools {
         }
     }
 
+    /**
+     * Verify if the topic exists
+     *
+     * @param connection connection
+     * @param topicName topic name
+     * @return true if topic exists otherwise return false
+     */
+    public boolean topicExists(final ZkUtils connection, final String topicName) {
+        return AdminUtils.topicExists(connection,topicName);
+    }
+
 }

@@ -104,8 +104,7 @@ public class TopicServiceTest {
 
 
     @Test
-    public void when_I_add_topic_property_then_I_was_able_to_read_then_same_topic_property_vale()
-            {
+    public void when_I_add_topic_property_then_I_was_able_to_read_then_same_topic_property_vale() {
 
         // Given
         ClusterTools clusterToolsMock = new ClusterTools() {
@@ -118,6 +117,10 @@ public class TopicServiceTest {
                 Properties props = new Properties();
                 props.setProperty("max.message.bytes","40000");
                 return props;
+            }
+            @Override
+            public boolean topicExists(final ZkUtils connection, final String topicName) {
+                return true;
             }
         };
         setClusterTools(clusterToolsMock);
@@ -136,6 +139,44 @@ public class TopicServiceTest {
 
         } catch (Exception e) {
             fail();
+        } finally {
+            topicService.close();
+        }
+
+    }
+
+
+    @Test(expected = TopicOperationException.class)
+    public void when_I_get_topic_property_and_topic_does_not_exist_then_It_throw_an_exception() {
+
+        // Given
+        ClusterTools clusterToolsMock = new ClusterTools() {
+            @Override
+            public void overrideTopicProperties(ZkUtils connection , String topicName, Properties configs) {
+
+            }
+            @Override
+            public Properties getTopicProperties(ZkUtils connection , String topicName) {
+                Properties props = new Properties();
+                props.setProperty("max.message.bytes","40000");
+                return props;
+            }
+            @Override
+            public boolean topicExists(final ZkUtils connection, final String topicName) {
+                return false;
+            }
+        };
+        setClusterTools(clusterToolsMock);
+
+        String topicName = "topic1-group0";
+        Properties properties = new Properties();
+        properties.setProperty("max.message.bytes","40000");
+
+        try {
+            // Then
+            final Properties topicProperties = topicService.getTopicProperties(topicName);
+            assertThat("",topicProperties.getProperty("max.message.bytes"),is("40000"));
+
         } finally {
             topicService.close();
         }
@@ -265,38 +306,121 @@ public class TopicServiceTest {
         }
     }
 
-
-    // @Test
-    public void test() {
+    @Test(expected = IllegalArgumentException.class)
+    public void when_I_add_topic_property_and_topic_is_null_then_a_exception_is_thrown() {
 
         // Given
-        String topicName = "topic1-group0";
-        String propertyKey = "max.message.bytes";
-        String propertyValue = "0";
-
+        String topicName = null;
         Properties properties = new Properties();
-//        properties.setProperty(propertyKey,propertyValue);
+        properties.setProperty("max.message.bytes","40000");
 
         try {
-            // Given
-            Map<String, String> config = new HashMap<>();
-            config.put(ClusterPropertyName.ZKSERVERS.getPropertyName(),"zookeeper-1:2181");
-            TopicService topicService = new TopicService(config);
-
             // When
             topicService.overrideTopicProperties(topicName,properties);
-
-            // Then
-            final Properties topicProperties = topicService.getTopicProperties(topicName);
-            assertThat("",topicProperties.getProperty(propertyKey),is(propertyValue));
-
-        } catch (Exception e) {
-
             fail();
+        } finally {
+            topicService.close();
         }
+    }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void when_I_add_topic_property_and_topic_is_empty_then_a_exception_is_thrown() {
 
+        // Given
+        String topicName = "";
+        Properties properties = new Properties();
+        properties.setProperty("max.message.bytes","40000");
+
+        try {
+            // When
+            topicService.overrideTopicProperties(topicName,properties);
+            fail();
+        } finally {
+            topicService.close();
+        }
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void when_I_get_topic_property_and_topic_is_null_then_a_exception_is_thrown() {
+        // Given
+        String topicName = null;
+        try {
+            // When
+            topicService.getTopicProperties(topicName);
+            fail();
+        } finally {
+            topicService.close();
+        }
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void when_I_get_topic_property_and_topic_is_empty_then_a_exception_is_thrown() {
+
+        // Given
+        String topicName = "";
+        try {
+            // When
+            topicService.getTopicProperties(topicName);
+            fail();
+        } finally {
+            topicService.close();
+        }
     }
 
 
+//    @Test
+//    public void test1() throws InterruptedException {
+//        ClusterConnection cnx = new ClusterConnection("zookeeper-1:2181,zookeeper-2:2181,zookeeper-3:2181","5000","5000",new Listener());
+//        Thread.sleep(60000 * 10);
+//    }
+//    @Test
+//    public void test() {
+//
+//        // Given
+//        String topicName = "topic1-group0";
+//        String propertyKey = "max.message.bytes";
+//        String propertyValue = "10000";
+//
+//        Properties properties = new Properties();
+//        properties.setProperty(propertyKey,propertyValue);
+//
+//        try {
+//            // Given
+//            Map<String, String> config = new HashMap<>();
+//            config.put(ClusterPropertyName.ZKSERVERS.getPropertyName(),"zookeeper-1:2181");
+//            TopicService topicService = new TopicService(config);
+//
+//            // When
+//            topicService.overrideTopicProperties(topicName,properties);
+//
+//            // Then
+//            final Properties topicProperties = topicService.getTopicProperties(null);
+//            assertThat("",topicProperties.getProperty(propertyKey),is(propertyValue));
+//
+//        } catch (Exception e) {
+//
+//            fail();
+//        }
+//
+//
+//    }
+//
+//
+//}
+//class Listener implements IZkStateListener {
+//
+//    @Override
+//    public void handleStateChanged(Watcher.Event.KeeperState keeperState) throws Exception {
+//        System.out.println(keeperState);
+//    }
+//
+//    @Override
+//    public void handleNewSession() throws Exception {
+//        System.out.println("handleNewSession called");
+//    }
+//
+//    @Override
+//    public void handleSessionEstablishmentError(Throwable throwable) throws Exception {
+//        throwable.printStackTrace();
+//    }
 }
