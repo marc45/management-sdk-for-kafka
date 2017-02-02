@@ -54,7 +54,7 @@ public class TopicService implements AutoCloseable {
      * @param topicName topic name
      * @param topicProperties topic properties
      * @throws IllegalArgumentException when topicName or topicProperties is empty or null.
-     * @throws com.intel.databus.operations.exception.TopicOperationException when topicName  does not exists
+     * @throws com.intel.databus.operations.exception.TopicOperationException when configuration could not be overridden
      */
     public void overrideTopicProperties(final String topicName,
                                         final Properties topicProperties) {
@@ -83,7 +83,8 @@ public class TopicService implements AutoCloseable {
      * @param topicName topic name
      * @return topic properties
      * @throws IllegalArgumentException when topicName is empty or null.
-     * @throws com.intel.databus.operations.exception.TopicOperationException when topicName does not exists
+     * @throws com.intel.databus.operations.exception.TopicOperationException when topicName does not exist or
+     * configuration could not be overridden
      */
     public Properties getTopicProperties(final String topicName) {
         validateTopicName(topicName);

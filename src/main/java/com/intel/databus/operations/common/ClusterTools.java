@@ -26,6 +26,7 @@ import kafka.admin.AdminOperationException;
 import kafka.admin.AdminUtils;
 import kafka.server.ConfigType;
 import kafka.utils.ZkUtils;
+import org.apache.kafka.common.KafkaException;
 
 import java.util.Properties;
 
@@ -44,7 +45,7 @@ public class ClusterTools {
     public void overrideTopicProperties(final ZkUtils connection, final String topicName, final Properties configs) {
         try {
             AdminUtils.changeTopicConfig(connection, topicName, configs);
-        } catch (AdminOperationException e) {
+        } catch (AdminOperationException | KafkaException e) {
             throw new TopicOperationException(topicName, e.getMessage(),e,this.getClass());
         }
     }
@@ -59,7 +60,7 @@ public class ClusterTools {
     public Properties getTopicProperties(final ZkUtils connection, final String topicName) {
         try {
             return AdminUtils.fetchEntityConfig(connection, ConfigType.Topic(),topicName);
-        } catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException | KafkaException e) {
             throw new TopicOperationException(topicName, e.getMessage(),e,this.getClass());
         }
     }
