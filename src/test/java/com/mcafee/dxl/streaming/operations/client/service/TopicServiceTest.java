@@ -19,14 +19,13 @@
  *
  */
 
-package com.intel.databus.operations;
+package com.mcafee.dxl.streaming.operations.client.service;
 
-import com.intel.databus.operations.common.ClusterConnection;
-import com.intel.databus.operations.common.ClusterPropertyName;
-import com.intel.databus.operations.common.ClusterTools;
-import com.intel.databus.operations.exception.ConnectionException;
-import com.intel.databus.operations.exception.TopicOperationException;
-import com.intel.databus.operations.service.TopicService;
+import com.mcafee.dxl.streaming.operations.client.common.ClusterConnection;
+import com.mcafee.dxl.streaming.operations.client.common.ClusterPropertyName;
+import com.mcafee.dxl.streaming.operations.client.common.ClusterTools;
+import com.mcafee.dxl.streaming.operations.client.exception.ConnectionException;
+import com.mcafee.dxl.streaming.operations.client.exception.TopicOperationException;
 import kafka.api.TopicMetadata;
 import kafka.utils.ZkUtils;
 import org.I0Itec.zkclient.ZkClient;
@@ -58,7 +57,7 @@ public class TopicServiceTest {
         Map<String, String> config = new HashMap<>();
         topicService = new TopicService(config);
 
-        clusterConnectionMock = new ClusterConnection("127.0.0.1:2181","5000","6000") {
+        clusterConnectionMock = new ClusterConnection("127.0.0.1:2181", "5000", "6000") {
             @Override
             public ZkUtils getZKUtils(ZkClient zkClient, String zkServers) {
                 return zkUtilsMock;
@@ -72,11 +71,11 @@ public class TopicServiceTest {
 
         ClusterTools clusterToolsMock = new ClusterTools() {
             @Override
-            public void overrideTopicProperties(ZkUtils connection , String topicName, Properties configs) {
+            public void overrideTopicProperties(ZkUtils connection, String topicName, Properties configs) {
             }
 
             @Override
-            public Properties getTopicProperties(ZkUtils connection , String topicName) {
+            public Properties getTopicProperties(ZkUtils connection, String topicName) {
                 return null;
             }
 
@@ -85,11 +84,11 @@ public class TopicServiceTest {
 
         final Field connField = topicService.getClass().getDeclaredField("connection");
         connField.setAccessible(true);
-        connField.set(topicService,clusterConnectionMock);
+        connField.set(topicService, clusterConnectionMock);
 
     }
 
-    private void setClusterTools(ClusterTools clusterTools)  {
+    private void setClusterTools(ClusterTools clusterTools) {
         final Field utilsField;
         try {
             utilsField = topicService.getClass().getDeclaredField("clusterTools");
@@ -109,15 +108,17 @@ public class TopicServiceTest {
         // Given
         ClusterTools clusterToolsMock = new ClusterTools() {
             @Override
-            public void overrideTopicProperties(ZkUtils connection , String topicName, Properties configs) {
+            public void overrideTopicProperties(ZkUtils connection, String topicName, Properties configs) {
 
             }
+
             @Override
-            public Properties getTopicProperties(ZkUtils connection , String topicName) {
+            public Properties getTopicProperties(ZkUtils connection, String topicName) {
                 Properties props = new Properties();
-                props.setProperty("max.message.bytes","40000");
+                props.setProperty("max.message.bytes", "40000");
                 return props;
             }
+
             @Override
             public boolean topicExists(final ZkUtils connection, final String topicName) {
                 return true;
@@ -127,15 +128,15 @@ public class TopicServiceTest {
 
         String topicName = "topic1-group0";
         Properties properties = new Properties();
-        properties.setProperty("max.message.bytes","40000");
+        properties.setProperty("max.message.bytes", "40000");
 
         try {
             // When
-            topicService.overrideTopicProperties(topicName,properties);
+            topicService.overrideTopicProperties(topicName, properties);
 
             // Then
             final Properties topicProperties = topicService.getTopicProperties(topicName);
-            assertThat("",topicProperties.getProperty("max.message.bytes"),is("40000"));
+            assertThat("", topicProperties.getProperty("max.message.bytes"), is("40000"));
 
         } catch (Exception e) {
             fail();
@@ -152,15 +153,17 @@ public class TopicServiceTest {
         // Given
         ClusterTools clusterToolsMock = new ClusterTools() {
             @Override
-            public void overrideTopicProperties(ZkUtils connection , String topicName, Properties configs) {
+            public void overrideTopicProperties(ZkUtils connection, String topicName, Properties configs) {
 
             }
+
             @Override
-            public Properties getTopicProperties(ZkUtils connection , String topicName) {
+            public Properties getTopicProperties(ZkUtils connection, String topicName) {
                 Properties props = new Properties();
-                props.setProperty("max.message.bytes","40000");
+                props.setProperty("max.message.bytes", "40000");
                 return props;
             }
+
             @Override
             public boolean topicExists(final ZkUtils connection, final String topicName) {
                 return false;
@@ -170,12 +173,12 @@ public class TopicServiceTest {
 
         String topicName = "topic1-group0";
         Properties properties = new Properties();
-        properties.setProperty("max.message.bytes","40000");
+        properties.setProperty("max.message.bytes", "40000");
 
         try {
             // Then
             final Properties topicProperties = topicService.getTopicProperties(topicName);
-            assertThat("",topicProperties.getProperty("max.message.bytes"),is("40000"));
+            assertThat("", topicProperties.getProperty("max.message.bytes"), is("40000"));
 
         } finally {
             topicService.close();
@@ -189,27 +192,25 @@ public class TopicServiceTest {
         // Given
         String topicName = "topic1-group0";
         Properties properties = new Properties();
-        properties.setProperty("max.message.bytes","40000");
+        properties.setProperty("max.message.bytes", "40000");
 
 
         ClusterTools clusterToolsMock = new ClusterTools() {
             @Override
-            public void overrideTopicProperties(ZkUtils connection , String topicName, Properties configs) {
-                throw new TopicOperationException(topicName,"Topic " + topicName + " does not exist.",null,this.getClass());
+            public void overrideTopicProperties(ZkUtils connection, String topicName, Properties configs) {
+                throw new TopicOperationException(topicName, "Topic " + topicName + " does not exist.", null, this.getClass());
             }
         };
         setClusterTools(clusterToolsMock);
 
         try {
             // When
-            topicService.overrideTopicProperties(topicName,properties);
+            topicService.overrideTopicProperties(topicName, properties);
             fail();
-        }
-        catch (TopicOperationException e) {
+        } catch (TopicOperationException e) {
             // Then
             assertTrue(e.getTopicName().equals(topicName));
-        }
-        catch(Exception e) {
+        } catch (Exception e) {
             fail();
         } finally {
             topicService.close();
@@ -220,12 +221,12 @@ public class TopicServiceTest {
 
 
     @Test
-    public void when_zkservers_is_not_configured_then_thows_exception()  {
+    public void when_zkservers_is_not_configured_then_thows_exception() {
 
         // Given
         String topicName = "topic1-group0";
         Properties properties = new Properties();
-        properties.setProperty("max.message.bytes","40000");
+        properties.setProperty("max.message.bytes", "40000");
 
         TopicService topicService = new TopicService(new HashMap<>());
 
@@ -233,12 +234,10 @@ public class TopicServiceTest {
             // When
             topicService.overrideTopicProperties(topicName, properties);
             fail();
-        }
-        catch(ConnectionException e) {
+        } catch (ConnectionException e) {
             //Then
             assertTrue(e.getMessage().equals("Zookeeper server address is empty or null"));
-        }
-        catch(Exception e) {
+        } catch (Exception e) {
             fail();
         } finally {
             topicService.close();
@@ -246,29 +245,27 @@ public class TopicServiceTest {
     }
 
     @Test
-    public void when_session_timeout_is_ill_configured_then_thows_exception()  {
+    public void when_session_timeout_is_ill_configured_then_thows_exception() {
 
         // Given
         String topicName = "topic1-group0";
         Properties properties = new Properties();
-        properties.setProperty("max.message.bytes","40000");
+        properties.setProperty("max.message.bytes", "40000");
 
-        Map<String,String> config = new HashMap<>();
-        config.put(ClusterPropertyName.ZKSERVERS.getPropertyName(),"127.0.0.1:2181");
-        config.put(ClusterPropertyName.ZK_CONNECTION_TIMEOUT_MS.getPropertyName(),"aaa");
-        config.put(ClusterPropertyName.ZK_SESSION_TIMEOUT_MS.getPropertyName(),"5000");
+        Map<String, String> config = new HashMap<>();
+        config.put(ClusterPropertyName.ZKSERVERS.getPropertyName(), "127.0.0.1:2181");
+        config.put(ClusterPropertyName.ZK_CONNECTION_TIMEOUT_MS.getPropertyName(), "aaa");
+        config.put(ClusterPropertyName.ZK_SESSION_TIMEOUT_MS.getPropertyName(), "5000");
         TopicService topicService = new TopicService(config);
 
         try {
             // When
             topicService.overrideTopicProperties(topicName, properties);
             fail();
-        }
-        catch(ConnectionException e) {
+        } catch (ConnectionException e) {
             //Then
             assertTrue(true);
-        }
-        catch(Exception e) {
+        } catch (Exception e) {
             fail();
         } finally {
             topicService.close();
@@ -277,29 +274,27 @@ public class TopicServiceTest {
 
 
     @Test
-    public void when_connection_timeout_is_ill_configured_then_thows_exception()  {
+    public void when_connection_timeout_is_ill_configured_then_thows_exception() {
 
         // Given
         String topicName = "topic1-group0";
         Properties properties = new Properties();
-        properties.setProperty("max.message.bytes","40000");
+        properties.setProperty("max.message.bytes", "40000");
 
-        Map<String,String> config = new HashMap<>();
-        config.put(ClusterPropertyName.ZKSERVERS.getPropertyName(),"127.0.0.1:2181");
-        config.put(ClusterPropertyName.ZK_CONNECTION_TIMEOUT_MS.getPropertyName(),"5000");
-        config.put(ClusterPropertyName.ZK_SESSION_TIMEOUT_MS.getPropertyName(),"bbb");
+        Map<String, String> config = new HashMap<>();
+        config.put(ClusterPropertyName.ZKSERVERS.getPropertyName(), "127.0.0.1:2181");
+        config.put(ClusterPropertyName.ZK_CONNECTION_TIMEOUT_MS.getPropertyName(), "5000");
+        config.put(ClusterPropertyName.ZK_SESSION_TIMEOUT_MS.getPropertyName(), "bbb");
         TopicService topicService = new TopicService(config);
 
         try {
             // When
             topicService.overrideTopicProperties(topicName, properties);
             fail();
-        }
-        catch(ConnectionException e) {
+        } catch (ConnectionException e) {
             //Then
             assertTrue(true);
-        }
-        catch(Exception e) {
+        } catch (Exception e) {
             fail();
         } finally {
             topicService.close();
@@ -312,11 +307,11 @@ public class TopicServiceTest {
         // Given
         String topicName = null;
         Properties properties = new Properties();
-        properties.setProperty("max.message.bytes","40000");
+        properties.setProperty("max.message.bytes", "40000");
 
         try {
             // When
-            topicService.overrideTopicProperties(topicName,properties);
+            topicService.overrideTopicProperties(topicName, properties);
             fail();
         } finally {
             topicService.close();
@@ -329,11 +324,11 @@ public class TopicServiceTest {
         // Given
         String topicName = "";
         Properties properties = new Properties();
-        properties.setProperty("max.message.bytes","40000");
+        properties.setProperty("max.message.bytes", "40000");
 
         try {
             // When
-            topicService.overrideTopicProperties(topicName,properties);
+            topicService.overrideTopicProperties(topicName, properties);
             fail();
         } finally {
             topicService.close();
@@ -367,60 +362,51 @@ public class TopicServiceTest {
         }
     }
 
+//    @Test
+//    public void test() throws IOException, ExecutionException, InterruptedException {
+//        ConnectStringParser p = new ConnectStringParser("zookeeper-1:2181,zookeeper-2:2181,zookeeper-3:2181");
+//        final ArrayList<InetSocketAddress> serverAddresses = p.getServerAddresses();
+//        final String stat1 = FourLetterWordMain.send4LetterWord("zookeeper-1", 2181, "stat");
+//        System.out.println(stat1);
+//
+//        final String stat2 = FourLetterWordMain.send4LetterWord("zookeeper-2", 2181, "mntr");
+//        System.out.println(stat2);
+//
+//        final String stat3 = FourLetterWordMain.send4LetterWord("zookeeper-3", 2181, "ruok");
+//        System.out.println(stat3);
+//
+//
+//        final Map<String, String> config = new HashMap<>();
+//
+//        config.put(ClusterPropertyName.ZKSERVERS.getPropertyName(),"zookeeper-1:2181,zookeeper-2:2181,zookeeper-3:2181");
+//
+//        ExecutorService executor = Executors.newFixedThreadPool(1);
+//        ZKClusterWatcher zkMonitor = new ZKClusterWatcher(config);
+//        executor.submit(() -> {
+//            System.out.println("Example started. Ctrl-C to finish");
+//            try {
+//                zkMonitor.start(); // Start Zookeeper Monitoring
+//
+//                while (true) {
+//                    final ZKCluster zookeerCluster = zkMonitor.getCluster();
+//
+//                    StringBuilder msg = new StringBuilder();
+//                    zookeerCluster.getZKNodes().forEach(zkBroker -> {
+//                        msg.append("  " + zkBroker.getZKNodeId() + ":" + zkBroker.getZkNodeStatus())  ;
+//                    });
+//                    System.out.println(LocalDateTime.now() + " [STATUS] " + zookeerCluster.getZookeeperClusterStatus() + msg.toString());
+//
+//                    Thread.sleep(2000);
+//
+//
+//                }
+//
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//            }
+//        }).get();
+//
+//
+//    }
 
-//    @Test
-//    public void test1() throws InterruptedException {
-//        ClusterConnection cnx = new ClusterConnection("zookeeper-1:2181,zookeeper-2:2181,zookeeper-3:2181","5000","5000",new Listener());
-//        Thread.sleep(60000 * 10);
-//    }
-//    @Test
-//    public void test() {
-//
-//        // Given
-//        String topicName = "topic1-group0";
-//        String propertyKey = "max.message.bytes";
-//        String propertyValue = "10000";
-//
-//        Properties properties = new Properties();
-//        properties.setProperty(propertyKey,propertyValue);
-//
-//        try {
-//            // Given
-//            Map<String, String> config = new HashMap<>();
-//            config.put(ClusterPropertyName.ZKSERVERS.getPropertyName(),"zookeeper-1:2181");
-//            TopicService topicService = new TopicService(config);
-//
-//            // When
-//            topicService.overrideTopicProperties(topicName,properties);
-//
-//            // Then
-//            final Properties topicProperties = topicService.getTopicProperties(null);
-//            assertThat("",topicProperties.getProperty(propertyKey),is(propertyValue));
-//
-//        } catch (Exception e) {
-//
-//            fail();
-//        }
-//
-//
-//    }
-//
-//
-//}
-//class Listener implements IZkStateListener {
-//
-//    @Override
-//    public void handleStateChanged(Watcher.Event.KeeperState keeperState) throws Exception {
-//        System.out.println(keeperState);
-//    }
-//
-//    @Override
-//    public void handleNewSession() throws Exception {
-//        System.out.println("handleNewSession called");
-//    }
-//
-//    @Override
-//    public void handleSessionEstablishmentError(Throwable throwable) throws Exception {
-//        throwable.printStackTrace();
-//    }
 }

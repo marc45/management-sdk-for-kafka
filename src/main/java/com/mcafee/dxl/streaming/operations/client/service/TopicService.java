@@ -1,30 +1,13 @@
-/*
- *  INTEL CONFIDENTIAL
- *  Copyright 2015 - 2017 Intel Corporation All Rights Reserved.
- *  The source code contained or described herein and all documents related to
- *  the source code ("Material") are owned by Intel Corporation or its suppliers
- *  or licensors. Title to the Material remains with Intel Corporation or its
- *  * suppliers and licensors. The Material contains trade secrets and proprietary
- *  and confidential information of Intel or its suppliers and licensors. The
- *  Material is protected by worldwide copyright and trade secret laws and
- *  treaty provisions. No part of the Material may be used, copied, reproduced,
- *  modified, published, uploaded, posted, transmitted, distributed, or
- *  disclosed in any way without Intel's prior express written permission.
- *
- *  No license under any patent, copyright, trade secret or other intellectual
- *  property right is granted to or conferred upon you by disclosure or delivery
- *  of the Materials, either expressly, by implication, inducement, estoppel or
- *  otherwise. Any license under such intellectual property rights must be
- *  express and approved by Intel in writing.
- *
+/**
+ * Copyright (c) 2017 McAfee Inc. - All Rights Reserved
  */
 
-package com.intel.databus.operations.service;
+package com.mcafee.dxl.streaming.operations.client.service;
 
-import com.intel.databus.operations.common.ClusterConnection;
-import com.intel.databus.operations.common.ClusterPropertyName;
-import com.intel.databus.operations.common.ClusterTools;
-import com.intel.databus.operations.exception.TopicOperationException;
+import com.mcafee.dxl.streaming.operations.client.common.ClusterConnection;
+import com.mcafee.dxl.streaming.operations.client.common.ClusterPropertyName;
+import com.mcafee.dxl.streaming.operations.client.common.ClusterTools;
+import com.mcafee.dxl.streaming.operations.client.exception.TopicOperationException;
 import kafka.utils.ZkUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -54,7 +37,7 @@ public class TopicService implements AutoCloseable {
      * @param topicName topic name
      * @param topicProperties topic properties
      * @throws IllegalArgumentException when topicName or topicProperties is empty or null.
-     * @throws com.intel.databus.operations.exception.TopicOperationException when configuration could not be overridden
+     * @throws com.mcafee.dxl.streaming.operations.client.exception.TopicOperationException when configuration could not be overridden
      */
     public void overrideTopicProperties(final String topicName,
                                         final Properties topicProperties) {
@@ -83,7 +66,7 @@ public class TopicService implements AutoCloseable {
      * @param topicName topic name
      * @return topic properties
      * @throws IllegalArgumentException when topicName is empty or null.
-     * @throws com.intel.databus.operations.exception.TopicOperationException when topicName does not exist or
+     * @throws com.mcafee.dxl.streaming.operations.client.exception.TopicOperationException when topicName does not exist or
      * configuration could not be overridden
      */
     public Properties getTopicProperties(final String topicName) {
@@ -99,7 +82,7 @@ public class TopicService implements AutoCloseable {
      * Get a Zookeeper connection
      *
      * @return Zookeeper connection
-     * @throws com.intel.databus.operations.exception.ConnectionException when Zookeeper connection failed
+     * @throws com.mcafee.dxl.streaming.operations.client.exception.ConnectionException when Zookeeper connection failed
      */
     private ZkUtils getConnection() {
 

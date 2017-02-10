@@ -28,30 +28,30 @@
 <suppressions>
 
     <suppress checks="Javadoc.*"
-              files="com[\\/]intel[\\/]databus[\\/]operations[\\/]"/>
+              files="com[\\/]mcafee[\\/]dxl[\\/]streaming[\\/]operations[\\/]client[\\/]"/>
 
     <suppress checks="whitespace.*"
-              files="com[\\/]intel[\\/]databus[\\/]operations[\\/]"/>
+              files="com[\\/]mcafee[\\/]dxl[\\/]streaming[\\/]operations[\\/]client[\\/]"/>
 
     <suppress checks="AvoidInlineConditionalsCheck"
-              files="com[\\/]intel[\\/]databus[\\/]operations[\\/]"/>
+              files="com[\\/]mcafee[\\/]dxl[\\/]streaming[\\/]operations[\\/]client[\\/]"/>
 
     <suppress checks="HiddenFieldCheck"
-              files="com[\\/]intel[\\/]databus[\\/]operations[\\/]"/>
+              files="com[\\/]mcafee[\\/]dxl[\\/]streaming[\\/]operations[\\/]client[\\/]"/>
 
     <suppress checks="JavadocMethodCheck"
-              files="com[\\/]intel[\\/]databus[\\/]operations[\\/]"/>
+              files="com[\\/]mcafee[\\/]dxl[\\/]streaming[\\/]operations[\\/]client[\\/]"/>
 
     <suppress checks="JavadocPackageCheck"
-              files="com[\\/]intel[\\/]databus[\\/]operations[\\/]"/>
+              files="com[\\/]mcafee[\\/]dxl[\\/]streaming[\\/]operations[\\/]client[\\/]"/>
 
     <suppress checks="JavadocTypeCheck"
-              files="com[\\/]intel[\\/]databus[\\/]operations[\\/]"/>
+              files="com[\\/]mcafee[\\/]dxl[\\/]streaming[\\/]operations[\\/]client[\\/]"/>
 
     <suppress checks="JavadocVariableCheck"
-              files="com[\\/]intel[\\/]databus[\\/]operations[\\/]"/>
+              files="com[\\/]mcafee[\\/]dxl[\\/]streaming[\\/]operations[\\/]client[\\/]"/>
 
     <suppress checks="DesignForExtension"
-              files="com[\\/]intel[\\/]databus[\\/]operations[\\/]"/>
+              files="com[\\/]mcafee[\\/]dxl[\\/]streaming[\\/]operations[\\/]client[\\/]"/>
 
 </suppressions>
