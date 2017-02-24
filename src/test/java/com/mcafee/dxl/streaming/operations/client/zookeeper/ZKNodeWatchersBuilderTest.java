@@ -1,6 +1,6 @@
 package com.mcafee.dxl.streaming.operations.client.zookeeper;
 
-import com.mcafee.dxl.streaming.operations.client.common.ClusterPropertyName;
+import com.mcafee.dxl.streaming.operations.client.configuration.PropertyNames;
 import org.apache.zookeeper.client.ConnectStringParser;
 import org.junit.Assert;
 import org.junit.Test;
@@ -12,12 +12,12 @@ public class ZKNodeWatchersBuilderTest {
     @Test
     public void should_get_a_list_of_brokers_watcher_from_comma_separated_zk_string() {
 
-        String zkHosts = ClusterPropertyName.ZKSERVERS.getDefaultValue();
+        String zkHosts = PropertyNames.ZK_SERVERS.getDefaultValue();
         ConnectStringParser parser =
-                new ConnectStringParser(ClusterPropertyName.ZKSERVERS.getDefaultValue());
+                new ConnectStringParser(PropertyNames.ZK_SERVERS.getDefaultValue());
 
-        int brokerPollingDelay = Integer.parseInt(ClusterPropertyName.ZK_NODE_POLL_DELAY_TIME_MS.getDefaultValue()) ;
-        int brokerPollingInitialDelay = Integer.parseInt(ClusterPropertyName.ZK_NODE_POLL_INITIAL_DELAY_TIME_MS.getDefaultValue());
+        int brokerPollingDelay = Integer.parseInt(PropertyNames.ZK_NODE_POLL_DELAY_TIME_MS.getDefaultValue()) ;
+        int brokerPollingInitialDelay = Integer.parseInt(PropertyNames.ZK_NODE_POLL_INITIAL_DELAY_TIME_MS.getDefaultValue());
 
         ZKMonitorCallback zkMonitorListener = new TestCallback();
 
@@ -42,7 +42,7 @@ public class ZKNodeWatchersBuilderTest {
 
 
 
-    class TestCallback extends ZKMonitorCallback {
+    class TestCallback implements ZKMonitorCallback {
         @Override
         public void onNodeUp(String zkNodeName) {
 

@@ -2,10 +2,10 @@
  * Copyright (c) 2017 McAfee Inc. - All Rights Reserved
  */
 
-package com.mcafee.dxl.streaming.operations.client.service;
+package com.mcafee.dxl.streaming.operations.client;
 
 import com.mcafee.dxl.streaming.operations.client.common.ClusterConnection;
-import com.mcafee.dxl.streaming.operations.client.common.ClusterPropertyName;
+import com.mcafee.dxl.streaming.operations.client.configuration.PropertyNames;
 import com.mcafee.dxl.streaming.operations.client.common.ClusterTools;
 import com.mcafee.dxl.streaming.operations.client.exception.TopicOperationException;
 import kafka.utils.ZkUtils;
@@ -90,13 +90,13 @@ public class TopicService implements AutoCloseable {
 
         if (this.connection == null) {
 
-            String zkServers = configuration.getOrDefault(ClusterPropertyName.ZKSERVERS.getPropertyName(), null);
+            String zkServers = configuration.getOrDefault(PropertyNames.ZK_SERVERS.getPropertyName(), null);
 
-            String connectionTimeoutMS = configuration.getOrDefault(ClusterPropertyName.ZK_CONNECTION_TIMEOUT_MS.getPropertyName(),
-                    ClusterPropertyName.ZK_CONNECTION_TIMEOUT_MS.getDefaultValue());
+            String connectionTimeoutMS = configuration.getOrDefault(PropertyNames.ZK_CONNECTION_TIMEOUT_MS.getPropertyName(),
+                    PropertyNames.ZK_CONNECTION_TIMEOUT_MS.getDefaultValue());
 
-            String sessionTimeoutMS = configuration.getOrDefault(ClusterPropertyName.ZK_SESSION_TIMEOUT_MS.getPropertyName(),
-                    ClusterPropertyName.ZK_SESSION_TIMEOUT_MS.getDefaultValue());
+            String sessionTimeoutMS = configuration.getOrDefault(PropertyNames.ZK_SESSION_TIMEOUT_MS.getPropertyName(),
+                    PropertyNames.ZK_SESSION_TIMEOUT_MS.getDefaultValue());
 
             this.connection = new ClusterConnection(zkServers, connectionTimeoutMS, sessionTimeoutMS);
         }

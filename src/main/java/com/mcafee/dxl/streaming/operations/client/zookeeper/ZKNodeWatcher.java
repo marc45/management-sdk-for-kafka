@@ -16,9 +16,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
- * Zookeeper Watcher
- *
- * It polls a specific zookeeper host and port service, then it update the status.
+ * Zookeeper node watcher
+ * <p>
+ * It polls a specific Zookeeper host and port server, then it update the status.
  */
 public class ZKNodeWatcher {
 
@@ -86,8 +86,8 @@ public class ZKNodeWatcher {
             throw new IllegalArgumentException("Zookeeper node polling delay time must be greather than zero");
         }
 
-        if (zkNodePollingInitialDelay <= 0) {
-            throw new IllegalArgumentException("Zookeeper node polling initial delay time must be greather than zero");
+        if (zkNodePollingInitialDelay < 0) {
+            throw new IllegalArgumentException("Zookeeper node polling initial delay time must be greather or equal than zero");
         }
     }
 
@@ -104,7 +104,7 @@ public class ZKNodeWatcher {
 
 
     /**
-     * It is called periodically by {@code startMonitoring} method to verify Zookeeper node status
+     * It is called periodically by {@link ZKNodeWatcher#startMonitoring()} method to verify Zookeeper node status
      *
      * @return {@link Runnable}
      */
@@ -119,6 +119,7 @@ public class ZKNodeWatcher {
     public void stopMonitoring() {
         if(executorController != null) {
             executorController.cancel(true);
+            executorController = null;
         }
 
         try {

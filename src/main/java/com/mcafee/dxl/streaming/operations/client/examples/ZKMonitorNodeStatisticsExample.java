@@ -4,13 +4,10 @@
 
 package com.mcafee.dxl.streaming.operations.client.examples;
 
-import com.mcafee.dxl.streaming.operations.client.common.ClusterPropertyName;
-import com.mcafee.dxl.streaming.operations.client.service.ZKMonitorService;
+import com.mcafee.dxl.streaming.operations.client.ZookeeperMonitor;
+import com.mcafee.dxl.streaming.operations.client.ZookeeperMonitorBuilder;
 import com.mcafee.dxl.streaming.operations.client.zookeeper.ZKClusterHealthName;
 import com.mcafee.dxl.streaming.operations.client.zookeeper.entities.ZKCluster;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * This example get zookeeper cluster status and print nodes' statistics
@@ -36,12 +33,12 @@ import java.util.Map;
 
  <pre>
  {@code
- public class ZKMonitorNodeStatisticsExample {
+public class ZKMonitorNodeStatisticsExample {
 
     private static final String ZOOKEEPER_SERVER_HOST_NAMES = "zookeeper-1:2181,zookeeper-2:2181,zookeeper-3:2181";
-    private static final String ZOOKEEPER_SESSION_TIME_OUT_MS = "8000";
-    private static final String ZOOKEEPER_POLL_INITIAL_DELAY_TIME_MS = "500";
-    private static final String ZOOKEEPER_POLL_DELAY_TIME_MS = "1000";
+    private static final int ZOOKEEPER_SESSION_TIME_OUT_MS = 8000;
+    private static final int ZOOKEEPER_POLL_INITIAL_DELAY_TIME_MS = 500;
+    private static final int ZOOKEEPER_POLL_DELAY_TIME_MS = 1000;
     private static final long TWO_SECONDS = 2000;
 
     // Example entry point
@@ -51,7 +48,12 @@ import java.util.Map;
 
     public void startExample() {
         try {
-            ZKMonitorService zkMonitor = new ZKMonitorService(getZookeeperMonitorConfiguration());
+            ZookeeperMonitor zkMonitor = new ZookeeperMonitorBuilder(ZOOKEEPER_SERVER_HOST_NAMES)
+                    .withZookeeperSessionTimeout(ZOOKEEPER_SESSION_TIME_OUT_MS)
+                    .withZKPollingInitialDelayTime(ZOOKEEPER_POLL_INITIAL_DELAY_TIME_MS)
+                    .withZKPollingDelayTime(ZOOKEEPER_POLL_DELAY_TIME_MS)
+                    .build();
+
             zkMonitor.start(); // Start Zookeeper Monitoring
             System.out.println("Example started. Waiting for zookeeper cluster being running...");
 
@@ -59,7 +61,7 @@ import java.util.Map;
                 Thread.sleep(TWO_SECONDS);
             }
 
-            final ZKCluster zookeeperCluster = zkMonitor.getStatus();
+            final ZKCluster zookeeperCluster = zkMonitor.getCluster();
 
             zookeeperCluster.getZKNodes().forEach(zkNode -> {
                 System.out.println("############ " + zkNode.getZKNodeId() + " " + zkNode.getZkNodeStatus() + " ############");
@@ -71,32 +73,17 @@ import java.util.Map;
             e.printStackTrace();
         }
     }
-
-    private Map<String, String> getZookeeperMonitorConfiguration() {
-
-        final Map<String, String> config = new HashMap<>();
-
-        config.put(ClusterPropertyName.ZKSERVERS.getPropertyName(),
-                ZOOKEEPER_SERVER_HOST_NAMES);
-        config.put(ClusterPropertyName.ZK_SESSION_TIMEOUT_MS.getPropertyName(),
-                ZOOKEEPER_SESSION_TIME_OUT_MS);
-        config.put(ClusterPropertyName.ZK_NODE_POLL_INITIAL_DELAY_TIME_MS.getPropertyName(),
-                ZOOKEEPER_POLL_INITIAL_DELAY_TIME_MS);
-        config.put(ClusterPropertyName.ZK_NODE_POLL_DELAY_TIME_MS.getPropertyName(),
-                ZOOKEEPER_POLL_DELAY_TIME_MS);
-        return config;
-    }
-
 }
- }</pre>
+}
+</pre>
  */
 
 public class ZKMonitorNodeStatisticsExample {
 
     private static final String ZOOKEEPER_SERVER_HOST_NAMES = "zookeeper-1:2181,zookeeper-2:2181,zookeeper-3:2181";
-    private static final String ZOOKEEPER_SESSION_TIME_OUT_MS = "8000";
-    private static final String ZOOKEEPER_POLL_INITIAL_DELAY_TIME_MS = "500";
-    private static final String ZOOKEEPER_POLL_DELAY_TIME_MS = "1000";
+    private static final int ZOOKEEPER_SESSION_TIME_OUT_MS = 8000;
+    private static final int ZOOKEEPER_POLL_INITIAL_DELAY_TIME_MS = 500;
+    private static final int ZOOKEEPER_POLL_DELAY_TIME_MS = 1000;
     private static final long TWO_SECONDS = 2000;
 
     // Example entry point
@@ -106,7 +93,12 @@ public class ZKMonitorNodeStatisticsExample {
 
     public void startExample() {
         try {
-            ZKMonitorService zkMonitor = new ZKMonitorService(getZookeeperMonitorConfiguration());
+            ZookeeperMonitor zkMonitor = new ZookeeperMonitorBuilder(ZOOKEEPER_SERVER_HOST_NAMES)
+                    .withZKSessionTimeout(ZOOKEEPER_SESSION_TIME_OUT_MS)
+                    .withZKPollingInitialDelayTime(ZOOKEEPER_POLL_INITIAL_DELAY_TIME_MS)
+                    .withZKPollingDelayTime(ZOOKEEPER_POLL_DELAY_TIME_MS)
+                    .build();
+
             zkMonitor.start(); // Start Zookeeper Monitoring
             System.out.println("Example started. Waiting for zookeeper cluster being running...");
 
@@ -114,7 +106,7 @@ public class ZKMonitorNodeStatisticsExample {
                 Thread.sleep(TWO_SECONDS);
             }
 
-            final ZKCluster zookeeperCluster = zkMonitor.getStatus();
+            final ZKCluster zookeeperCluster = zkMonitor.getCluster();
 
             zookeeperCluster.getZKNodes().forEach(zkNode -> {
                 System.out.println("############ " + zkNode.getZKNodeId() + " " + zkNode.getZkNodeStatus() + " ############");
@@ -125,24 +117,6 @@ public class ZKMonitorNodeStatisticsExample {
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    /**
-     * @return a map containing the mandatory configuration for performing Zookeeper Monitoring
-     */
-    private Map<String, String> getZookeeperMonitorConfiguration() {
-
-        final Map<String, String> config = new HashMap<>();
-
-        config.put(ClusterPropertyName.ZKSERVERS.getPropertyName(),
-                ZOOKEEPER_SERVER_HOST_NAMES);
-        config.put(ClusterPropertyName.ZK_SESSION_TIMEOUT_MS.getPropertyName(),
-                ZOOKEEPER_SESSION_TIME_OUT_MS);
-        config.put(ClusterPropertyName.ZK_NODE_POLL_INITIAL_DELAY_TIME_MS.getPropertyName(),
-                ZOOKEEPER_POLL_INITIAL_DELAY_TIME_MS);
-        config.put(ClusterPropertyName.ZK_NODE_POLL_DELAY_TIME_MS.getPropertyName(),
-                ZOOKEEPER_POLL_DELAY_TIME_MS);
-        return config;
     }
 
 }

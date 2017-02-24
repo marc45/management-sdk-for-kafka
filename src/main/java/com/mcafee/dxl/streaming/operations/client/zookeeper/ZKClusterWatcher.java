@@ -4,13 +4,14 @@
 
 package com.mcafee.dxl.streaming.operations.client.zookeeper;
 
-import com.mcafee.dxl.streaming.operations.client.common.ClusterPropertyName;
+import com.mcafee.dxl.streaming.operations.client.common.HostAdapter;
+import com.mcafee.dxl.streaming.operations.client.configuration.ConfigHelp;
+import com.mcafee.dxl.streaming.operations.client.configuration.PropertyNames;
 import com.mcafee.dxl.streaming.operations.client.exception.ZKMonitorException;
 import com.mcafee.dxl.streaming.operations.client.zookeeper.entities.ZKCluster;
 import com.mcafee.dxl.streaming.operations.client.zookeeper.entities.ZKNode;
 import org.apache.zookeeper.WatchedEvent;
 import org.apache.zookeeper.Watcher;
-import org.apache.zookeeper.client.ConnectStringParser;
 
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
@@ -26,17 +27,20 @@ import java.util.concurrent.atomic.AtomicReference;
 public final class ZKClusterWatcher implements Watcher {
 
     private ZKMonitorCallback zkMonitorListener;
-    private int sessionTimeout;
-    private int zkNodePollingDelay;
-    private int zkNodePollingInitialDelay;
-    private ZKConnection zkConnection = null;
     private List<ZKNodeWatcher> zkNodeWatchers = new ArrayList<>();
     private AtomicReference<ZKClusterStatusName> zkClusterStatus = null;
+
+    /**
+     * Zookeeper connection fields
+     */
+    private int sessionTimeout;
+    private ZKConnection zkConnection = null;
     private String zkConnectionString;
 
 
     /**
-     * Use this construct when zookeeper notifications have be sent to client.
+     * Constructs a Zookeeper watcher instance that monitors Zookeeper cluster and notify
+     * clients when Zookeeper node status has changed.
      *
      * @param configuration     configuration
      * @param zkMonitorListener a listener implementd by the client to be notified when zookeeper quorum event occurs
@@ -45,14 +49,61 @@ public final class ZKClusterWatcher implements Watcher {
     public ZKClusterWatcher(final Map<String, String> configuration,
                             final ZKMonitorCallback zkMonitorListener) {
 
-        validateConfigurationAndSetFields(configuration, zkMonitorListener);
+        if (configuration == null) {
+            throw new IllegalArgumentException("Zookeeper Monitoring Configuration cannot be null");
+        }
+
+        this.zkConnectionString =
+                ConfigHelp.getRequiredStringProperty(configuration, PropertyNames.ZK_SERVERS);
+
+        this.sessionTimeout =
+                ConfigHelp.getOrDefaultIntProperty(configuration, PropertyNames.ZK_SESSION_TIMEOUT_MS);
+
+        final int zkNodePollingDelay =
+                ConfigHelp.getOrDefaultIntProperty(configuration, PropertyNames.ZK_NODE_POLL_DELAY_TIME_MS);
+
+        final int zkNodePollingInitialDelay =
+                ConfigHelp.getOrDefaultIntProperty(configuration, PropertyNames.ZK_NODE_POLL_INITIAL_DELAY_TIME_MS);
+
+
+        this.zkMonitorListener = Optional.ofNullable(zkMonitorListener).orElse(new ZKMonitorCallback() {
+            @Override
+            public void onNodeUp(final String zkNodeName) {
+
+            }
+
+            @Override
+            public void onNodeDown(final String zkNodeName) {
+
+            }
+
+            @Override
+            public void onGetQuorum() {
+
+            }
+
+            @Override
+            public void onLackOfQuorum() {
+
+            }
+        });
+
+        final List<InetSocketAddress> zkHosts = HostAdapter.toList(this.zkConnectionString);
+
+        zkHosts.forEach(zkNodeAddress ->
+                zkNodeWatchers.add(new ZKNodeWatcher(
+                        this.zkMonitorListener,
+                        zkNodeAddress,
+                        zkNodePollingDelay,
+                        zkNodePollingInitialDelay))
+        );
 
         getAndSetZKClusterStatus(ZKClusterStatusName.NO_QUORUM);  // Set the initial zookeeper cluster status
     }
 
 
     /**
-     * Use this construct when zookeeper notifications have not be sent to client.
+     * Creates a Zookeeper watcher instance that monitors Zookeeper cluster.
      *
      * @param configuration configuration
      */
@@ -160,9 +211,8 @@ public final class ZKClusterWatcher implements Watcher {
      * it returns NO_QUORUM or WARNING respectively. Otherwise it returns OK.
      *
      * @return {@link ZKClusterHealthName} zookeeper status health
-     * @throws ZKMonitorException if {@link ZKClusterWatcher#start()} was not called.
+     * @throws ZKMonitorException    if {@link ZKClusterWatcher#start()} was not called.
      * @throws IllegalStateException if {@link ZKClusterWatcher#start()} was not called.
-     *
      * @see ZKClusterHealthName for status name meaning
      */
     public ZKClusterHealthName getHealth() {
@@ -199,7 +249,6 @@ public final class ZKClusterWatcher implements Watcher {
         zkConnection = new ZKConnection(this);
         zkConnection.connect(zkConnectionString, sessionTimeout);
     }
-
 
 
     /**
@@ -246,125 +295,6 @@ public final class ZKClusterWatcher implements Watcher {
             return newZKClusterStatus;
         } else {
             return zkClusterStatus.getAndSet(newZKClusterStatus);
-        }
-    }
-
-
-    /**
-     * It validates configuration and initialize instance fields
-     *
-     * @param configuration
-     * @param zkMonitorListener
-     */
-    private void validateConfigurationAndSetFields(final Map<String, String> configuration,
-                                                   final ZKMonitorCallback zkMonitorListener) {
-        if (configuration == null) {
-            throw new IllegalArgumentException("Zookeeper Monitoring Configuration cannot be null");
-        }
-
-        initializeInstanceFields(configuration, zkMonitorListener);
-
-        buildZKNodeWatchers(configuration);
-
-    }
-
-
-    /**
-     * Build and set zookeeper watchers from configuration
-     *
-     * @param configuration configuration
-     */
-    private void buildZKNodeWatchers(final Map<String, String> configuration) {
-        final List<InetSocketAddress> zkHosts = parseAndGetZKHosts(configuration);
-
-        zkHosts.forEach(zkNodeAddress -> {
-            zkNodeWatchers.add(new ZKNodeWatcher(
-                    this.zkMonitorListener,
-                    zkNodeAddress,
-                    zkNodePollingDelay,
-                    zkNodePollingInitialDelay));
-        });
-    }
-
-
-    /**
-     *
-     * @param configuration configuration
-     * @param zkMonitorListener zookeeper monitor listener
-     */
-    private void initializeInstanceFields(final Map<String, String> configuration,
-                                          final ZKMonitorCallback zkMonitorListener) {
-        try {
-            this.sessionTimeout = Integer.parseInt(
-                    configuration.getOrDefault(ClusterPropertyName.ZK_SESSION_TIMEOUT_MS.getPropertyName(),
-                            ClusterPropertyName.ZK_SESSION_TIMEOUT_MS.getDefaultValue()));
-
-        } catch (NumberFormatException e) {
-            throw new IllegalArgumentException(ClusterPropertyName.ZK_SESSION_TIMEOUT_MS.getPropertyName() +
-                    " invalid property value. " + e.getMessage());
-        }
-        try {
-            this.zkNodePollingDelay = Integer.parseInt(
-                    configuration.getOrDefault(ClusterPropertyName.ZK_NODE_POLL_DELAY_TIME_MS.getPropertyName(),
-                            ClusterPropertyName.ZK_NODE_POLL_DELAY_TIME_MS.getDefaultValue()));
-
-        } catch (NumberFormatException e) {
-            throw new IllegalArgumentException(ClusterPropertyName.ZK_NODE_POLL_DELAY_TIME_MS.getPropertyName() +
-                    " invalid property value. " + e.getMessage());
-        }
-        try {
-            this.zkNodePollingInitialDelay = Integer.parseInt(
-                    configuration.getOrDefault(ClusterPropertyName.ZK_NODE_POLL_INITIAL_DELAY_TIME_MS.getPropertyName(),
-                            ClusterPropertyName.ZK_NODE_POLL_INITIAL_DELAY_TIME_MS.getDefaultValue())
-            );
-        } catch (NumberFormatException e) {
-            throw new IllegalArgumentException(ClusterPropertyName.ZK_NODE_POLL_INITIAL_DELAY_TIME_MS.getPropertyName() +
-                    " invalid property value. " + e.getMessage());
-        }
-
-
-        this.zkMonitorListener = Optional.ofNullable(zkMonitorListener).orElse(new ZKMonitorCallback() {
-            @Override
-            public void onNodeUp(final String zkNodeName) {
-            }
-
-            @Override
-            public void onNodeDown(final String zkNodeName) {
-            }
-
-            @Override
-            public void onGetQuorum() {
-            }
-
-            @Override
-            public void onLackOfQuorum() {
-            }
-        });
-    }
-
-
-    /**
-     * Parses a comma-separated string of zookeeper nodes from configuration.
-     *
-     * @param configuration
-     * @return a list of zookeeper node addresses
-     * @throws IllegalArgumentException when property is missing or invalid value
-     */
-    private List<InetSocketAddress> parseAndGetZKHosts(final Map<String, String> configuration) {
-
-        if (!configuration.containsKey(ClusterPropertyName.ZKSERVERS.getPropertyName())) {
-            throw new IllegalArgumentException(ClusterPropertyName.ZKSERVERS.getPropertyName() + " property is missing");
-        }
-
-        try {
-            this.zkConnectionString = configuration.get(ClusterPropertyName.ZKSERVERS.getPropertyName());
-            final ConnectStringParser parser =
-                    new ConnectStringParser(zkConnectionString);
-
-            return parser.getServerAddresses();
-
-        } catch (Exception e) {
-            throw new IllegalArgumentException("Cannot parse zookeeper hosts");
         }
     }
 

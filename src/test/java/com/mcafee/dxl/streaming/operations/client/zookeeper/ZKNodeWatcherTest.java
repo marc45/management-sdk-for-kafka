@@ -16,7 +16,7 @@ public class ZKNodeWatcherTest {
         new ZKNodeWatcher(new TestCallback(),null,500,1);
     }
 
-    class TestCallback extends ZKMonitorCallback {
+    class TestCallback implements ZKMonitorCallback {
 
         @Override
         public void onNodeUp(String zkNodeName) {

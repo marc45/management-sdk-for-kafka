@@ -5,13 +5,11 @@
 
 package com.mcafee.dxl.streaming.operations.client.examples;
 
-import com.mcafee.dxl.streaming.operations.client.common.ClusterPropertyName;
-import com.mcafee.dxl.streaming.operations.client.service.ZKMonitorService;
+import com.mcafee.dxl.streaming.operations.client.ZookeeperMonitor;
+import com.mcafee.dxl.streaming.operations.client.ZookeeperMonitorBuilder;
 import com.mcafee.dxl.streaming.operations.client.zookeeper.ZKMonitorCallback;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -26,10 +24,10 @@ import java.util.concurrent.TimeUnit;
  public final class ZKMonitorEventListenerExample {
 
     private static final String ZOOKEEPER_SERVER_HOST_NAMES = "zookeeper-1:2181,zookeeper-2:2181,zookeeper-3:2181";
-    private static final String ZOOKEEPER_SESSION_TIME_OUT_MS = "8000";
-    private static final String ZOOKEEPER_POLL_DELAY_TIME_MS = "1000";
+    private static final int ZOOKEEPER_SESSION_TIME_OUT_MS = 8000;
+    private static final int ZOOKEEPER_POLL_DELAY_TIME_MS = 1000;
     private final ExecutorService executor;
-    private ZKMonitorService zkMonitor;
+    private ZookeeperMonitor zkMonitor;
 
     ZKMonitorEventListenerExample() {
 
@@ -39,10 +37,12 @@ import java.util.concurrent.TimeUnit;
         );
 
         // Create a Zookeeper Monitor and set a Callback to listen to Zookeeper events
-        zkMonitor = new ZKMonitorService(getZookeeperMonitorConfiguration(),
-                new EventPrinterCallback());
-
         this.executor = Executors.newFixedThreadPool(1);
+        zkMonitor = new ZookeeperMonitorBuilder(ZOOKEEPER_SERVER_HOST_NAMES)
+                .withZKSessionTimeout(ZOOKEEPER_SESSION_TIME_OUT_MS)
+                .withZKPollingDelayTime(ZOOKEEPER_POLL_DELAY_TIME_MS)
+                .withZKMonitorListener(new EventPrinterCallback())
+                .build();
     }
 
     private void stopExample() {
@@ -59,6 +59,7 @@ import java.util.concurrent.TimeUnit;
         }
     }
 
+    // It spawns a background thread to run zookeeper monitoring indefinitely up to Ctrl-C
     public void startExample() {
         executor.submit(() -> {
             System.out.println("Example started. Ctrl-C to finish");
@@ -71,25 +72,14 @@ import java.util.concurrent.TimeUnit;
     }
 
 
-    private Map<String, String> getZookeeperMonitorConfiguration() {
-
-        final Map<String, String> config = new HashMap<>();
-
-        config.put(ClusterPropertyName.ZKSERVERS.getPropertyName(),
-                ZOOKEEPER_SERVER_HOST_NAMES);
-        config.put(ClusterPropertyName.ZK_SESSION_TIMEOUT_MS.getPropertyName(),
-                ZOOKEEPER_SESSION_TIME_OUT_MS);
-        config.put(ClusterPropertyName.ZK_NODE_POLL_DELAY_TIME_MS.getPropertyName(),
-                ZOOKEEPER_POLL_DELAY_TIME_MS);
-        return config;
-    }
-
     //  Example entry point
     public static void main(final String[] args) {
         new ZKMonitorEventListenerExample().startExample();
     }
 
-    private class EventPrinterCallback extends ZKMonitorCallback {
+    // This class listen to Zookeeper Monitor Events
+    // Each time Zookeeper quorum changes or a Zookeeper broker goes down/up, the corresponding method handler is called.
+    private class EventPrinterCallback implements ZKMonitorCallback {
 
         public void onNodeUp(final String zkNodeName) {
             System.out.println(LocalDateTime.now() + " [EVENT] ZK Node is started:" + zkNodeName);
@@ -109,17 +99,17 @@ import java.util.concurrent.TimeUnit;
 
     }
 }
-
- }</pre>
+}
+</pre>
  */
 
 public final class ZKMonitorEventListenerExample {
 
     private static final String ZOOKEEPER_SERVER_HOST_NAMES = "zookeeper-1:2181,zookeeper-2:2181,zookeeper-3:2181";
-    private static final String ZOOKEEPER_SESSION_TIME_OUT_MS = "8000";
-    private static final String ZOOKEEPER_POLL_DELAY_TIME_MS = "1000";
+    private static final int ZOOKEEPER_SESSION_TIME_OUT_MS = 8000;
+    private static final int ZOOKEEPER_POLL_DELAY_TIME_MS = 1000;
     private final ExecutorService executor;
-    private ZKMonitorService zkMonitor;
+    private ZookeeperMonitor zkMonitor;
 
     ZKMonitorEventListenerExample() {
 
@@ -129,10 +119,12 @@ public final class ZKMonitorEventListenerExample {
         );
 
         // Create a Zookeeper Monitor and set a Callback to listen to Zookeeper events
-        zkMonitor = new ZKMonitorService(getZookeeperMonitorConfiguration(),
-                new EventPrinterCallback());
-
         this.executor = Executors.newFixedThreadPool(1);
+        zkMonitor = new ZookeeperMonitorBuilder(ZOOKEEPER_SERVER_HOST_NAMES)
+                .withZKSessionTimeout(ZOOKEEPER_SESSION_TIME_OUT_MS)
+                .withZKPollingDelayTime(ZOOKEEPER_POLL_DELAY_TIME_MS)
+                .withZKMonitorListener(new EventPrinterCallback())
+                .build();
     }
 
     private void stopExample() {
@@ -149,9 +141,7 @@ public final class ZKMonitorEventListenerExample {
         }
     }
 
-    /**
-     * It spawns a background thread to run zookeeper monitoring indefinitely up to Ctrl-C
-     */
+    // It spawns a background thread to run zookeeper monitoring indefinitely up to Ctrl-C
     public void startExample() {
         executor.submit(() -> {
             System.out.println("Example started. Ctrl-C to finish");
@@ -164,33 +154,14 @@ public final class ZKMonitorEventListenerExample {
     }
 
 
-    /**
-     * @return a map containing the mandatory configuration for performing Zookeeper Monitoring
-     */
-    private Map<String, String> getZookeeperMonitorConfiguration() {
-
-        final Map<String, String> config = new HashMap<>();
-
-        config.put(ClusterPropertyName.ZKSERVERS.getPropertyName(),
-                ZOOKEEPER_SERVER_HOST_NAMES);
-        config.put(ClusterPropertyName.ZK_SESSION_TIMEOUT_MS.getPropertyName(),
-                ZOOKEEPER_SESSION_TIME_OUT_MS);
-        config.put(ClusterPropertyName.ZK_NODE_POLL_DELAY_TIME_MS.getPropertyName(),
-                ZOOKEEPER_POLL_DELAY_TIME_MS);
-        return config;
-    }
-
     //  Example entry point
     public static void main(final String[] args) {
         new ZKMonitorEventListenerExample().startExample();
     }
 
-    /**
-     * This class listen to Zookeeper Monitor Events
-     * <p>
-     * Each time Zookeeper quorum changes or a Zookeeper broker goes down/up, the corresponding method handler is called.
-     */
-    private class EventPrinterCallback extends ZKMonitorCallback {
+    // This class listen to Zookeeper Monitor Events
+    // Each time Zookeeper quorum changes or a Zookeeper broker goes down/up, the corresponding method handler is called.
+    private class EventPrinterCallback implements ZKMonitorCallback {
 
         @Override
         public void onNodeUp(final String zkNodeName) {

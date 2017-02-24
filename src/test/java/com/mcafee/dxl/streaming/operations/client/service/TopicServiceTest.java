@@ -21,8 +21,9 @@
 
 package com.mcafee.dxl.streaming.operations.client.service;
 
+import com.mcafee.dxl.streaming.operations.client.TopicService;
 import com.mcafee.dxl.streaming.operations.client.common.ClusterConnection;
-import com.mcafee.dxl.streaming.operations.client.common.ClusterPropertyName;
+import com.mcafee.dxl.streaming.operations.client.configuration.PropertyNames;
 import com.mcafee.dxl.streaming.operations.client.common.ClusterTools;
 import com.mcafee.dxl.streaming.operations.client.exception.ConnectionException;
 import com.mcafee.dxl.streaming.operations.client.exception.TopicOperationException;
@@ -253,9 +254,9 @@ public class TopicServiceTest {
         properties.setProperty("max.message.bytes", "40000");
 
         Map<String, String> config = new HashMap<>();
-        config.put(ClusterPropertyName.ZKSERVERS.getPropertyName(), "127.0.0.1:2181");
-        config.put(ClusterPropertyName.ZK_CONNECTION_TIMEOUT_MS.getPropertyName(), "aaa");
-        config.put(ClusterPropertyName.ZK_SESSION_TIMEOUT_MS.getPropertyName(), "5000");
+        config.put(PropertyNames.ZK_SERVERS.getPropertyName(), "127.0.0.1:2181");
+        config.put(PropertyNames.ZK_CONNECTION_TIMEOUT_MS.getPropertyName(), "aaa");
+        config.put(PropertyNames.ZK_SESSION_TIMEOUT_MS.getPropertyName(), "5000");
         TopicService topicService = new TopicService(config);
 
         try {
@@ -282,9 +283,9 @@ public class TopicServiceTest {
         properties.setProperty("max.message.bytes", "40000");
 
         Map<String, String> config = new HashMap<>();
-        config.put(ClusterPropertyName.ZKSERVERS.getPropertyName(), "127.0.0.1:2181");
-        config.put(ClusterPropertyName.ZK_CONNECTION_TIMEOUT_MS.getPropertyName(), "5000");
-        config.put(ClusterPropertyName.ZK_SESSION_TIMEOUT_MS.getPropertyName(), "bbb");
+        config.put(PropertyNames.ZK_SERVERS.getPropertyName(), "127.0.0.1:2181");
+        config.put(PropertyNames.ZK_CONNECTION_TIMEOUT_MS.getPropertyName(), "5000");
+        config.put(PropertyNames.ZK_SESSION_TIMEOUT_MS.getPropertyName(), "bbb");
         TopicService topicService = new TopicService(config);
 
         try {
@@ -361,52 +362,4 @@ public class TopicServiceTest {
             topicService.close();
         }
     }
-
-//    @Test
-//    public void test() throws IOException, ExecutionException, InterruptedException {
-//        ConnectStringParser p = new ConnectStringParser("zookeeper-1:2181,zookeeper-2:2181,zookeeper-3:2181");
-//        final ArrayList<InetSocketAddress> serverAddresses = p.getServerAddresses();
-//        final String stat1 = FourLetterWordMain.send4LetterWord("zookeeper-1", 2181, "stat");
-//        System.out.println(stat1);
-//
-//        final String stat2 = FourLetterWordMain.send4LetterWord("zookeeper-2", 2181, "mntr");
-//        System.out.println(stat2);
-//
-//        final String stat3 = FourLetterWordMain.send4LetterWord("zookeeper-3", 2181, "ruok");
-//        System.out.println(stat3);
-//
-//
-//        final Map<String, String> config = new HashMap<>();
-//
-//        config.put(ClusterPropertyName.ZKSERVERS.getPropertyName(),"zookeeper-1:2181,zookeeper-2:2181,zookeeper-3:2181");
-//
-//        ExecutorService executor = Executors.newFixedThreadPool(1);
-//        ZKClusterWatcher zkMonitor = new ZKClusterWatcher(config);
-//        executor.submit(() -> {
-//            System.out.println("Example started. Ctrl-C to finish");
-//            try {
-//                zkMonitor.start(); // Start Zookeeper Monitoring
-//
-//                while (true) {
-//                    final ZKCluster zookeerCluster = zkMonitor.getCluster();
-//
-//                    StringBuilder msg = new StringBuilder();
-//                    zookeerCluster.getZKNodes().forEach(zkBroker -> {
-//                        msg.append("  " + zkBroker.getZKNodeId() + ":" + zkBroker.getZkNodeStatus())  ;
-//                    });
-//                    System.out.println(LocalDateTime.now() + " [STATUS] " + zookeerCluster.getZookeeperClusterStatus() + msg.toString());
-//
-//                    Thread.sleep(2000);
-//
-//
-//                }
-//
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//            }
-//        }).get();
-//
-//
-//    }
-
 }

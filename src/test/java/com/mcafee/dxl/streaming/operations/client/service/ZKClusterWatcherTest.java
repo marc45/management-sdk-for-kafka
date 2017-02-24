@@ -1,6 +1,6 @@
 package com.mcafee.dxl.streaming.operations.client.service;
 
-import com.mcafee.dxl.streaming.operations.client.common.ClusterPropertyName;
+import com.mcafee.dxl.streaming.operations.client.configuration.PropertyNames;
 import com.mcafee.dxl.streaming.operations.client.exception.ConnectionException;
 import com.mcafee.dxl.streaming.operations.client.zookeeper.ZKClusterWatcher;
 import com.mcafee.dxl.streaming.operations.client.zookeeper.ZKMonitorCallback;
@@ -17,9 +17,12 @@ public class ZKClusterWatcherTest {
         new ZKClusterWatcher(null, new TestCallback());
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void when_listener_is_null_constructor_throw_exception() {
-        new ZKClusterWatcher(new HashMap<>(),null);
+    @Test
+    public void when_listener_is_null_it_is_ok() {
+        Map<String,String> config = new HashMap<>();
+        config.put(PropertyNames.ZK_SERVERS.getPropertyName(), PropertyNames.ZK_SERVERS.getDefaultValue());
+        final ZKClusterWatcher zkClusterWatcher = new ZKClusterWatcher(config, null);
+        Assert.assertTrue(zkClusterWatcher!=null);
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -33,7 +36,7 @@ public class ZKClusterWatcherTest {
     @Test(expected = IllegalStateException.class)
     public void when_get_status_and_monitor_is_not_started_throw_exception() {
         Map<String,String> config = new HashMap<>();
-        config.put(ClusterPropertyName.ZKSERVERS.getPropertyName(),ClusterPropertyName.ZKSERVERS.getDefaultValue());
+        config.put(PropertyNames.ZK_SERVERS.getPropertyName(), PropertyNames.ZK_SERVERS.getDefaultValue());
         final ZKClusterWatcher zkMonitor = new ZKClusterWatcher(config, new TestCallback());
         zkMonitor.getCluster();
     }
@@ -41,7 +44,7 @@ public class ZKClusterWatcherTest {
     @Test(expected = IllegalStateException.class)
     public void when_call_process_and_monitor_is_not_started_throw_exception() {
         Map<String,String> config = new HashMap<>();
-        config.put(ClusterPropertyName.ZKSERVERS.getPropertyName(),ClusterPropertyName.ZKSERVERS.getDefaultValue());
+        config.put(PropertyNames.ZK_SERVERS.getPropertyName(), PropertyNames.ZK_SERVERS.getDefaultValue());
         final ZKClusterWatcher zkMonitor = new ZKClusterWatcher(config, new TestCallback());
         zkMonitor.process(null);
     }
@@ -49,7 +52,7 @@ public class ZKClusterWatcherTest {
     @Test(expected = ConnectionException.class)
     public void when_zkhosts_are_invalid_throw_exception() {
         Map<String,String> config = new HashMap<>();
-        config.put(ClusterPropertyName.ZKSERVERS.getPropertyName(),"zk1:2189,zk2:2189,zk3:2189");
+        config.put(PropertyNames.ZK_SERVERS.getPropertyName(),"zk1:2189,zk2:2189,zk3:2189");
         final ZKClusterWatcher zkMonitor = new ZKClusterWatcher(config, new TestCallback());
         zkMonitor.start();
     }
@@ -59,7 +62,7 @@ public class ZKClusterWatcherTest {
     public void when_call_stop_and_monitor_is_not_started_should_throw_exception() {
         try {
             Map<String,String> config = new HashMap<>();
-            config.put(ClusterPropertyName.ZKSERVERS.getPropertyName(),"zk1:2189,zk2:2189,zk3:2189");
+            config.put(PropertyNames.ZK_SERVERS.getPropertyName(),"zk1:2189,zk2:2189,zk3:2189");
             final ZKClusterWatcher zkMonitor = new ZKClusterWatcher(config, new TestCallback());
             zkMonitor.stop();
             Assert.assertTrue(true);
@@ -68,7 +71,7 @@ public class ZKClusterWatcherTest {
         }
     }
 
-    class TestCallback extends ZKMonitorCallback {
+    class TestCallback implements ZKMonitorCallback {
 
         @Override
         public void onNodeUp(String zkNodeName) {
