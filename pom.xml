@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.intel.databus</groupId>
+    <groupId>com.mcafee.dxl.streaming.operations.client</groupId>
     <artifactId>databus-mgmt-sdk</artifactId>
     <version>0.0.1</version>
 
@@ -197,8 +197,8 @@
                             <manifestEntries>
                                 <serviceVersion>${project.version}</serviceVersion>
                                 <buildNumber>${build.number}</buildNumber>
-                                <Created-By>Intel Corporation</Created-By>
-                                <Built-By>Intel Corporation</Built-By>
+                                <Created-By>McAfee</Created-By>
+                                <Built-By>McAfee</Built-By>
                             </manifestEntries>
                         </archive>
                     </configuration>
