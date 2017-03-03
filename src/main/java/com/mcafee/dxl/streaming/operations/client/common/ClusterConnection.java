@@ -14,7 +14,7 @@ import org.apache.commons.lang3.StringUtils;
 /**
  * Cluster Connection
  */
-public class ClusterConnection {
+public class ClusterConnection implements AutoCloseable{
 
     private final ZkUtils zkUtils;
     private final ZkClient zkClient;

@@ -11,7 +11,7 @@ import com.mcafee.dxl.streaming.operations.client.zookeeper.entities.ZKCluster;
 
 /**
  * This example get zookeeper cluster status and print nodes' statistics
- * This is  an exampl of the information that zookeeper node offer:
+ * This is  an example of the information that zookeeper node offer:
  *
  * <p>
  * Zookeeper version: 3.4.8--1, built on 02/06/2016 03:18 GMT
@@ -33,7 +33,7 @@ import com.mcafee.dxl.streaming.operations.client.zookeeper.entities.ZKCluster;
 
  <pre>
  {@code
-public class ZKMonitorNodeStatisticsExample {
+ public class ZKMonitorNodeStatisticsExample {
 
     private static final String ZOOKEEPER_SERVER_HOST_NAMES = "zookeeper-1:2181,zookeeper-2:2181,zookeeper-3:2181";
     private static final int ZOOKEEPER_SESSION_TIME_OUT_MS = 8000;
@@ -47,12 +47,11 @@ public class ZKMonitorNodeStatisticsExample {
     }
 
     public void startExample() {
-        try {
-            ZookeeperMonitor zkMonitor = new ZookeeperMonitorBuilder(ZOOKEEPER_SERVER_HOST_NAMES)
-                    .withZookeeperSessionTimeout(ZOOKEEPER_SESSION_TIME_OUT_MS)
-                    .withZKPollingInitialDelayTime(ZOOKEEPER_POLL_INITIAL_DELAY_TIME_MS)
-                    .withZKPollingDelayTime(ZOOKEEPER_POLL_DELAY_TIME_MS)
-                    .build();
+        try (ZookeeperMonitor zkMonitor = new ZookeeperMonitorBuilder(ZOOKEEPER_SERVER_HOST_NAMES)
+                .withZKSessionTimeout(ZOOKEEPER_SESSION_TIME_OUT_MS)
+                .withZKPollingInitialDelayTime(ZOOKEEPER_POLL_INITIAL_DELAY_TIME_MS)
+                .withZKPollingDelayTime(ZOOKEEPER_POLL_DELAY_TIME_MS)
+                .build()) {
 
             zkMonitor.start(); // Start Zookeeper Monitoring
             System.out.println("Example started. Waiting for zookeeper cluster being running...");
@@ -67,14 +66,14 @@ public class ZKMonitorNodeStatisticsExample {
                 System.out.println("############ " + zkNode.getZKNodeId() + " " + zkNode.getZkNodeStatus() + " ############");
                 System.out.println(zkNode.getZkNodeStatistics());
             });
-            zkMonitor.stop();
 
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
+
 }
-}
+ }
 </pre>
  */
 
@@ -92,12 +91,11 @@ public class ZKMonitorNodeStatisticsExample {
     }
 
     public void startExample() {
-        try {
-            ZookeeperMonitor zkMonitor = new ZookeeperMonitorBuilder(ZOOKEEPER_SERVER_HOST_NAMES)
-                    .withZKSessionTimeout(ZOOKEEPER_SESSION_TIME_OUT_MS)
-                    .withZKPollingInitialDelayTime(ZOOKEEPER_POLL_INITIAL_DELAY_TIME_MS)
-                    .withZKPollingDelayTime(ZOOKEEPER_POLL_DELAY_TIME_MS)
-                    .build();
+        try (ZookeeperMonitor zkMonitor = new ZookeeperMonitorBuilder(ZOOKEEPER_SERVER_HOST_NAMES)
+                .withZKSessionTimeout(ZOOKEEPER_SESSION_TIME_OUT_MS)
+                .withZKPollingInitialDelayTime(ZOOKEEPER_POLL_INITIAL_DELAY_TIME_MS)
+                .withZKPollingDelayTime(ZOOKEEPER_POLL_DELAY_TIME_MS)
+                .build()) {
 
             zkMonitor.start(); // Start Zookeeper Monitoring
             System.out.println("Example started. Waiting for zookeeper cluster being running...");
@@ -112,7 +110,6 @@ public class ZKMonitorNodeStatisticsExample {
                 System.out.println("############ " + zkNode.getZKNodeId() + " " + zkNode.getZkNodeStatus() + " ############");
                 System.out.println(zkNode.getZkNodeStatistics());
             });
-            zkMonitor.stop();
 
         } catch (Exception e) {
             e.printStackTrace();

@@ -4,10 +4,18 @@
 
 package com.mcafee.dxl.streaming.operations.client.kafka;
 
+import com.mcafee.dxl.streaming.operations.client.common.ClusterConnection;
+import com.mcafee.dxl.streaming.operations.client.common.ClusterTools;
+import com.mcafee.dxl.streaming.operations.client.configuration.PropertyNames;
 import com.mcafee.dxl.streaming.operations.client.exception.KFMonitorException;
+import com.mcafee.dxl.streaming.operations.client.kafka.entities.KFBrokerMetadata;
+import kafka.cluster.Broker;
+import scala.collection.JavaConversions;
 
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -46,27 +54,41 @@ public final class KFBrokerWatcher {
     private AtomicReference<KFBrokerStatusName> kfBrokerStatus =
             new AtomicReference<>(KFBrokerStatusName.DOWN);
 
+    private AtomicReference<KFBrokerMetadata> kfBrokerMetadata =
+            new AtomicReference<>(new KFBrokerMetadata());
+
     /**
      * Listener used to notify clients when a Kafka broker status has changed
      */
     private KFMonitorCallback kfMonitorListener;
 
     /**
+     * Zookeeper connection fields
+     */
+    private String zkConnectionString;
+    private int zkSessionTimeout;
+
+
+    /**
      * Creates a instance
      *
      * @param kfMonitorListener         {@link KFMonitorCallback} instance to notify clients when a broker change
      * @param kfBrokerAddress           List of kafka broker addresses
+     * @param zkConnectionString        Coma-separated list of Zookeepers host
+     * @param zkSessionTimeout          Zookeeper session timeout
      * @param kfNodePollingDelay        Amount of time to poll Kafka broker expressed in ms
      * @param kfNodePollingInitialDelay Amount of time expressed in ms before starting Kafka broker poll
      */
     public KFBrokerWatcher(final KFMonitorCallback kfMonitorListener,
                            final InetSocketAddress kfBrokerAddress,
+                           final String zkConnectionString,
+                           final int zkSessionTimeout,
                            final int kfNodePollingDelay,
                            final int kfNodePollingInitialDelay) {
 
-
         validateArguments(kfMonitorListener,
                 kfBrokerAddress,
+                zkConnectionString,
                 kfNodePollingDelay,
                 kfNodePollingInitialDelay);
 
@@ -75,7 +97,17 @@ public final class KFBrokerWatcher {
         this.kfNodePollingInitialDelay = kfNodePollingInitialDelay;
         this.kfBrokerAddress = kfBrokerAddress;
         this.executor = Executors.newScheduledThreadPool(1);
+        this.zkConnectionString = zkConnectionString;
+        this.zkSessionTimeout = zkSessionTimeout;
         getAndSetStatus();
+    }
+
+    /**
+     * Get Kafka broker metadata
+     * @return Kafka broker metadata
+     */
+    public KFBrokerMetadata getBrokerMetadata() {
+        return kfBrokerMetadata.get();
     }
 
     /**
@@ -201,14 +233,15 @@ public final class KFBrokerWatcher {
 
     /**
      * Validate constructor arguments
-     *
      * @param kfMonitorListener
      * @param kfNodeAddress
+     * @param zkConnectionString
      * @param kfNodePollingDelay
      * @param kfNodePollingInitialDelay
      */
     private void validateArguments(final KFMonitorCallback kfMonitorListener,
                                    final InetSocketAddress kfNodeAddress,
+                                   final String zkConnectionString,
                                    final int kfNodePollingDelay,
                                    final int kfNodePollingInitialDelay) {
 
@@ -220,6 +253,10 @@ public final class KFBrokerWatcher {
             throw new IllegalArgumentException("Kafka address cannot be null");
         }
 
+        if (zkConnectionString == null) {
+            throw new IllegalArgumentException("Zookeeper connection string cannot be null");
+        }
+
         if (kfNodePollingDelay <= 0) {
             throw new IllegalArgumentException("Kafka broker polling delay time must be greather than zero");
         }
@@ -227,6 +264,64 @@ public final class KFBrokerWatcher {
         if (kfNodePollingInitialDelay < 0) {
             throw new IllegalArgumentException("Kafka broker polling initial delay time must be greather or equal than zero");
         }
+    }
+
+    /**
+     * It spawns a new thread and update Kafka broker metadata
+     */
+    public void updateMetadataAsync() {
+        final Runnable runnable  = () -> {
+            final List<Broker> kafkaBrokers = getRegisteredKafkaBrokers();
+            kfBrokerMetadata.set(getBrokerMetadataByAddress(kafkaBrokers ,kfBrokerAddress));
+        };
+        Thread thread = new Thread(runnable);
+        thread.start();
+    }
+
+    /**
+     * Get a list of registered Kafka broker.
+     * If the connection has failed or any other exception is thrown, it return an empty list
+     *
+     * @return list of registered Kafka brokers
+     */
+    private List<Broker> getRegisteredKafkaBrokers() {
+        try(ClusterConnection cnx = new ClusterConnection(zkConnectionString,
+                PropertyNames.ZK_CONNECTION_TIMEOUT_MS.getDefaultValue(),
+                String.valueOf(zkSessionTimeout))) {
+
+            final ClusterTools clusterTools = new ClusterTools();
+            return clusterTools.getKafkaBrokers(cnx.getConnection());
+        } catch (Exception e){
+        }
+        return new ArrayList<>();
+    }
+
+    /**
+     * Get Kafka broker metadata for a specific address
+     *
+     * @param kafkaBrokers list of registered Kafka brokers
+     * @param kfBrokerAddress address to look for
+     * @return Kafka broker metadata
+     */
+    private KFBrokerMetadata getBrokerMetadataByAddress(final List<Broker> kafkaBrokers,
+                                                        final InetSocketAddress kfBrokerAddress) {
+
+        KFBrokerMetadata brokerMetadata = new KFBrokerMetadata();
+
+        kafkaBrokers.forEach(broker -> {
+            JavaConversions.mapAsJavaMap(broker.endPoints())
+                    .forEach( (protocol, endpoint) -> {
+                        if (endpoint.host().equals(kfBrokerAddress.getHostName())
+                                && endpoint.port() == kfBrokerAddress.getPort()) {
+                            brokerMetadata.setBrokerId(broker.id());
+                            brokerMetadata.setHost(endpoint.host());
+                            brokerMetadata.setPort(endpoint.port());
+                            brokerMetadata.setConnectionString(endpoint.connectionString());
+                            brokerMetadata.setSecurityProtocol(protocol.name);
+                        }
+                    });
+        });
+        return brokerMetadata;
     }
 
 }

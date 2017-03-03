@@ -17,7 +17,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * This example uses a event listener mechanism to receive Kafka broker status changes.
 
-  <pre>
+ <pre>
 {@code
 public final class KFMonitorEventListenerExample {
 
@@ -89,6 +89,7 @@ public final class KFMonitorEventListenerExample {
         }
     }
 }
+
 }
 </pre>
  */

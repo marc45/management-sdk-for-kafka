@@ -48,7 +48,7 @@ import java.util.Map;
  * @see com.mcafee.dxl.streaming.operations.client.examples.KFMonitorPollingStatusExample
  * @see com.mcafee.dxl.streaming.operations.client.examples.KFMonitorPollingStatusExample
  */
-public class KafkaMonitor {
+public class KafkaMonitor implements AutoCloseable {
 
     /**
      * Kafka cluster watcher
@@ -130,5 +130,15 @@ public class KafkaMonitor {
      */
     public KFClusterStatusName getHealth() {
         return kfClusterWatcher.getHealth();
+    }
+
+    /**
+     * Stop monitor using try-with-resources statement
+     *
+     * @throws Exception if cannot stop Kafka monitor
+     */
+    @Override
+    public void close() throws Exception {
+        stop();
     }
 }

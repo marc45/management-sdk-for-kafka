@@ -50,7 +50,7 @@ import java.util.Map;
  * @see com.mcafee.dxl.streaming.operations.client.examples.ZKMonitorClusterHealthExample
  * @see com.mcafee.dxl.streaming.operations.client.examples.ZKMonitorNodeStatisticsExample
  */
-public final class ZookeeperMonitor {
+public final class ZookeeperMonitor implements AutoCloseable {
 
     private final ZKClusterWatcher zkClusterWatcher;
 
@@ -128,4 +128,13 @@ public final class ZookeeperMonitor {
         return zkClusterWatcher.getHealth();
     }
 
+    /**
+     * Stop monitor by using try-with-resources statement
+     *
+     * @throws Exception if cannot stop Zookeeper monitor
+     */
+    @Override
+    public void close() throws Exception {
+        stop();
+    }
 }

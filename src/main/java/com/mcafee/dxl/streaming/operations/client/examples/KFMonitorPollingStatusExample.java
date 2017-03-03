@@ -38,7 +38,7 @@ public class KFMonitorPollingStatusExample {
         );
 
         // Create a Zookeeper Monitor using Builder helper
-        kfMonitor = new KafkaMonitorBuilder(ZOOKEEPER_SERVER_HOST_NAMES, KAFKA_SERVER_HOST_NAMES)
+        kfMonitor = new KafkaMonitorBuilder(KAFKA_SERVER_HOST_NAMES, ZOOKEEPER_SERVER_HOST_NAMES)
                 .withZookeeperSessionTimeout(ZOOKEEPER_SESSION_TIME_OUT_MS)
                 .build();
 
@@ -72,7 +72,7 @@ public class KFMonitorPollingStatusExample {
 
                     StringBuilder msg = new StringBuilder();
                     kfClusterStatus.getKFBrokers().forEach(kfBroker -> {
-                        msg.append("  " + kfBroker.getHostName() + " " + kfBroker.getStatus());
+                        msg.append("  " + kfBroker.getBrokerName() + " " + kfBroker.getStatus());
                     });
                     System.out.println(LocalDateTime.now() + " [STATUS] " +kfClusterStatus.getKfClusterStatus() + " "+  msg.toString());
 
@@ -99,6 +99,7 @@ public class KFMonitorPollingStatusExample {
 
     }
 }
+
 }
  </pre>
  */
@@ -156,7 +157,7 @@ public class KFMonitorPollingStatusExample {
 
                     StringBuilder msg = new StringBuilder();
                     kfClusterStatus.getKFBrokers().forEach(kfBroker -> {
-                        msg.append("  " + kfBroker.getHostName() + " " + kfBroker.getStatus());
+                        msg.append("  " + kfBroker.getBrokerName() + " " + kfBroker.getStatus());
                     });
                     System.out.println(LocalDateTime.now() + " [STATUS] " +kfClusterStatus.getKfClusterStatus() + " "+  msg.toString());
 

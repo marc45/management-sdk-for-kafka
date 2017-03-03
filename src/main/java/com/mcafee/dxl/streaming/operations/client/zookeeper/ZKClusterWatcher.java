@@ -129,7 +129,7 @@ public final class ZKClusterWatcher implements Watcher {
         zkNodeWatchers.forEach(zkNodeWatcher -> {
 
             ZKNode node = new ZKNode(
-                    zkNodeWatcher.getZKNodeAddress().getHostName() + ":" + zkNodeWatcher.getZKNodeAddress().getPort(),
+                    zkNodeWatcher.getZKNodeAddress().getHostName(),
                     zkNodeWatcher.getStatus().getStatus(),
                     zkNodeWatcher.getStatus().getZKNodeStatistics());
 

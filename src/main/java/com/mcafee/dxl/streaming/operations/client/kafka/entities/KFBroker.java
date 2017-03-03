@@ -12,27 +12,51 @@ import com.mcafee.dxl.streaming.operations.client.kafka.KFBrokerStatusName;
  */
 public class KFBroker {
 
-    private String hostName;
-
     private KFBrokerStatusName status;
+    private String brokerName;
+    private KFBrokerMetadata brokerMetadata;
 
     /**
-     *
-     * @param hostName Kafka broker host name
+     * @param brokerName broker name
+     * @param brokerMetadata Kafka broker metadata
      * @param status Kafka broker status
      */
-    public KFBroker(final String hostName,
+    public KFBroker(final String brokerName,
+                    final KFBrokerMetadata brokerMetadata,
                     final KFBrokerStatusName status) {
 
-        this.hostName = hostName;
+        this.brokerName = brokerName;
+        this.brokerMetadata = brokerMetadata;
         this.status = status;
     }
 
-    public String getHostName() {
-        return hostName;
+
+    public String getBrokerName() {
+        return brokerName;
     }
 
     public KFBrokerStatusName getStatus() {
         return status;
     }
+
+    public String getHostName() {
+        return brokerMetadata.getHost();
+    }
+
+    public int getId() {
+        return brokerMetadata.getBrokerId();
+    }
+
+    public int getPort() {
+        return brokerMetadata.getPort();
+    }
+
+    public String getConnectionString() {
+        return brokerMetadata.getConnectionString();
+    }
+
+    public String getSecurityProtocol() {
+        return brokerMetadata.getSecurityProtocol();
+    }
+
 }

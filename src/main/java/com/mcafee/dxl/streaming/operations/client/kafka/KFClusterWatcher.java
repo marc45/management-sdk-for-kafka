@@ -4,16 +4,21 @@
 
 package com.mcafee.dxl.streaming.operations.client.kafka;
 
+import com.mcafee.dxl.streaming.operations.client.common.ClusterConnection;
+import com.mcafee.dxl.streaming.operations.client.common.ClusterTools;
 import com.mcafee.dxl.streaming.operations.client.common.HostAdapter;
 import com.mcafee.dxl.streaming.operations.client.configuration.ConfigHelp;
 import com.mcafee.dxl.streaming.operations.client.configuration.PropertyNames;
 import com.mcafee.dxl.streaming.operations.client.kafka.entities.KFBroker;
+import com.mcafee.dxl.streaming.operations.client.kafka.entities.KFBrokerMetadata;
 import com.mcafee.dxl.streaming.operations.client.kafka.entities.KFCluster;
 import com.mcafee.dxl.streaming.operations.client.zookeeper.ZKConnection;
+import kafka.cluster.Broker;
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.WatchedEvent;
 import org.apache.zookeeper.Watcher;
 import org.apache.zookeeper.ZooKeeper;
+import scala.collection.JavaConversions;
 
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
@@ -22,6 +27,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 
 /**
  * It monitors a Kafka cluster. It keeps Kafka cluster status which can be recovered by clients using
@@ -102,10 +108,16 @@ public final class KFClusterWatcher implements Watcher {
             }
         });
 
-        createKafkaBrokerWatchers(kfHostsAddress,
-                kfMonitorCallback,
-                kfBrokerPollingDelay,
-                kfBrokerPollingInitialDelay);
+        // Create Kafka broker watchers
+        brokerWatchers.addAll(kfHostsAddress
+                .stream()
+                .map(kfAddress -> new KFBrokerWatcher(kfMonitorCallback,
+                        kfAddress,
+                        zkConnectionString,
+                        zkSessionTimeout,
+                        kfBrokerPollingDelay,
+                        kfBrokerPollingInitialDelay))
+                .collect(Collectors.toList()));
     }
 
 
@@ -168,7 +180,9 @@ public final class KFClusterWatcher implements Watcher {
 
         brokerWatchers.forEach(brokerWatcher -> {
             final KFBroker kfBroker =
-                    new KFBroker(brokerWatcher.getKfBrokerAddress().getHostName(), brokerWatcher.getStatus());
+                    new KFBroker(brokerWatcher.getKfBrokerAddress().getHostName(),
+                            brokerWatcher.getBrokerMetadata(),
+                            brokerWatcher.getStatus());
             kfBrokers.add(kfBroker);
         });
 
@@ -222,9 +236,7 @@ public final class KFClusterWatcher implements Watcher {
         }
 
         if (event.getType() != Event.EventType.None) {
-
             initializeWatcherAsync(); // Must initialize the watcher because it is one-shot.
-
             switch (event.getType()) {
                 case NodeChildrenChanged: // Oops! A kafka broker has appeared / disappeared
                     updateBrokers();      // Force to update brokers' status
@@ -232,9 +244,23 @@ public final class KFClusterWatcher implements Watcher {
 
                 default:
             }
+        } else {
+            switch (event.getState()) {
+                case SyncConnected:
+                    updateMetadataBrokers(); // Zookeeper has quorum, then lets brokers update metadata
+                    break;
+
+                default:
+            }
         }
     }
 
+    /**
+     * Force to each broker watcher to update ist metadata
+     */
+    private void updateMetadataBrokers() {
+        brokerWatchers.forEach(brokerWatcher -> brokerWatcher.updateMetadataAsync());
+    }
 
     /**
      * Close Zookeeper connection
@@ -263,24 +289,49 @@ public final class KFClusterWatcher implements Watcher {
 
 
     /**
-     * It creates a set of Kafka broker watcher based on zookeeper connection string
+     * Get a list of registered Kafka broker.
+     * If the connection has failed or any other exception is thrown, it return an empty list
      *
-     * @param kfHostsAddress            List of kafka broker addresses
-     * @param kfMonitorListener         {@link KFMonitorCallback} instance to notify clients when a broker change
-     * @param kfNodePollingDelay        Amount of time to poll Kafka broker expressed in ms
-     * @param kfNodePollingInitialDelay Amount of time expressed in ms before starting Kafka broker poll
+     * @return list of registered Kafka brokers
      */
-    private void createKafkaBrokerWatchers(final List<InetSocketAddress> kfHostsAddress,
-                                           final KFMonitorCallback kfMonitorListener,
-                                           final int kfNodePollingDelay,
-                                           final int kfNodePollingInitialDelay) {
+    private List<Broker> getRegisteredKafkaBrokers() {
+        try (ClusterConnection cnx = new ClusterConnection(zkConnectionString,
+                PropertyNames.ZK_CONNECTION_TIMEOUT_MS.
+                        getDefaultValue(), String.valueOf(zkSessionTimeout))) {
 
-        kfHostsAddress.forEach(kfAddress -> brokerWatchers.add(
-                new KFBrokerWatcher(kfMonitorListener,
-                        kfAddress,
-                        kfNodePollingDelay,
-                        kfNodePollingInitialDelay)
-        ));
+            final ClusterTools clusterTools = new ClusterTools();
+            return clusterTools.getKafkaBrokers(cnx.getConnection());
+        } catch (Exception e) {
+        }
+        return new ArrayList<>();
+    }
+
+    /**
+     * Get Kafka broker metadata for a specific address
+     *
+     * @param kafkaBrokers    list of registered Kafka brokers
+     * @param kfBrokerAddress address to look for
+     * @return Kafka broker metadata
+     */
+    private KFBrokerMetadata getBrokerMetadataByAddress(final List<Broker> kafkaBrokers,
+                                                        final InetSocketAddress kfBrokerAddress) {
+
+        KFBrokerMetadata brokerMetadata = new KFBrokerMetadata();
+
+        kafkaBrokers.forEach(broker -> {
+            JavaConversions.mapAsJavaMap(broker.endPoints())
+                    .forEach((protocol, endpoint) -> {
+                        if (endpoint.host().equals(kfBrokerAddress.getHostName())
+                                && endpoint.port() == kfBrokerAddress.getPort()) {
+                            brokerMetadata.setBrokerId(broker.id());
+                            brokerMetadata.setHost(endpoint.host());
+                            brokerMetadata.setPort(endpoint.port());
+                            brokerMetadata.setConnectionString(endpoint.connectionString());
+                            brokerMetadata.setSecurityProtocol(protocol.name);
+                        }
+                    });
+        });
+        return brokerMetadata;
     }
 
 
