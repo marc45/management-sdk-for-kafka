@@ -30,7 +30,7 @@ public class ZookeeperMonitorBuilder {
     private int zkPollingDelayTime = -1;
     private int zkPollingInitialDelayTime = -1;
     private ZKMonitorCallback zkMonitorListener = null;
-    private int zookeeperSessionTimeout;
+    private int zookeeperSessionTimeout = -1;
 
     /**
      * Constructor
@@ -107,8 +107,10 @@ public class ZookeeperMonitorBuilder {
                     getPropertyName(), String.valueOf(zkPollingInitialDelayTime));
         }
 
-        configuration.put(PropertyNames.ZK_SESSION_TIMEOUT_MS.
-                getPropertyName(), String.valueOf(zookeeperSessionTimeout));
+        if (zookeeperSessionTimeout >= 0) {
+            configuration.put(PropertyNames.ZK_SESSION_TIMEOUT_MS.
+                    getPropertyName(), String.valueOf(zookeeperSessionTimeout));
+        }
 
         return new ZookeeperMonitor(configuration, zkMonitorListener);
     }

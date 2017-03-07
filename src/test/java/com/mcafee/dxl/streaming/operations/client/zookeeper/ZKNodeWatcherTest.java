@@ -1,3 +1,7 @@
+/**
+ * Copyright (c) 2017 McAfee Inc. - All Rights Reserved
+ */
+
 package com.mcafee.dxl.streaming.operations.client.zookeeper;
 
 import org.junit.Test;

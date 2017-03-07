@@ -73,4 +73,30 @@ public class ClusterTools {
     }
 
 
+    /**
+     * Create a topic
+     *
+     * @param connection        Connection
+     * @param topicName         Topic name
+     * @param partitions        The number of partitions for the topic being created
+     * @param replicationFactor The replication factor for each partition in the topic being created
+     * @param topicProperties   A topic configuration override for an existing topic
+     * @throws TopicOperationException if topic was not created.
+     */
+    public void createTopic(final ZkUtils connection, final String topicName,
+                            final int partitions,
+                            final int replicationFactor,
+                            final Properties topicProperties) {
+
+        try {
+            AdminUtils.createTopic(connection,
+                    topicName,
+                    partitions,
+                    replicationFactor,
+                    topicProperties);
+
+        } catch (IllegalArgumentException | KafkaException | AdminOperationException e) {
+            throw new TopicOperationException(topicName, e.getMessage(), e, this.getClass());
+        }
+    }
 }
