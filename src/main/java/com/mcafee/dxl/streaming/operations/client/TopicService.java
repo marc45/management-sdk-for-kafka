@@ -83,10 +83,12 @@ public class TopicService implements AutoCloseable {
      * Get all the topics
      *
      * @return a list of all topics. If no topics are available, a empty list is returned.
+     *
+     * @throws com.mcafee.dxl.streaming.operations.client.exception.ConnectionException if Zookeeper connection fails
      */
     public List<String> getAllTopics() {
         List<String> allTopics = new ArrayList<>();
-        Seq<String> allTopicsSeq = getConnection().getAllTopics();
+        final Seq<String> allTopicsSeq = getConnection().getAllTopics();
         if (allTopicsSeq != null) {
             allTopics = scala
                     .collection
