@@ -10,7 +10,10 @@ import com.mcafee.dxl.streaming.operations.client.configuration.PropertyNames;
 import com.mcafee.dxl.streaming.operations.client.exception.TopicOperationException;
 import kafka.utils.ZkUtils;
 import org.apache.commons.lang3.StringUtils;
+import scala.collection.Seq;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
@@ -75,6 +78,23 @@ public class TopicService implements AutoCloseable {
                 topicProperties);
     }
 
+
+    /**
+     * Get all the topics
+     *
+     * @return a list of all topics. If no topics are available, a empty list is returned.
+     */
+    public List<String> getAllTopics() {
+        List<String> allTopics = new ArrayList<>();
+        Seq<String> allTopicsSeq = getConnection().getAllTopics();
+        if (allTopicsSeq != null) {
+            allTopics = scala
+                    .collection
+                    .JavaConversions
+                    .seqAsJavaList(allTopicsSeq);
+        }
+        return allTopics;
+    }
 
     /**
      * Override topic properties.

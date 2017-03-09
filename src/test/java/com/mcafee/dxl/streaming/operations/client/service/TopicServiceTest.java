@@ -13,17 +13,23 @@ import com.mcafee.dxl.streaming.operations.client.exception.TopicOperationExcept
 import kafka.api.TopicMetadata;
 import kafka.utils.ZkUtils;
 import org.I0Itec.zkclient.ZkClient;
+import org.hamcrest.core.Is;
 import org.junit.Before;
 import org.junit.Test;
+import scala.collection.Seq;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class TopicServiceTest {
 
@@ -87,7 +93,7 @@ public class TopicServiceTest {
 
 
     @Test
-    public void when_I_add_topic_property_then_I_was_able_to_read_then_same_topic_property_vale() {
+    public void when_I_add_topic_property_then_I_was_able_to_read_then_same_topic_property_value() {
 
         // Given
         ClusterTools clusterToolsMock = new ClusterTools() {
@@ -130,6 +136,26 @@ public class TopicServiceTest {
 
     }
 
+    @Test
+    public void when_I_kafka_has_topics_and_I_getAllTopics_then_I_get_all_these_topics() {
+        List<String> topics = new ArrayList<>();
+        topics.add("RTopic-1");
+        topics.add("ELaTopic-2");
+
+        Seq<String> topicsFromZK = scala.collection.JavaConversions.asScalaBuffer(topics).seq();
+        when(zkUtilsMock.getAllTopics()).thenReturn(topicsFromZK);
+
+        List<String> allTopics = topicService.getAllTopics();
+        assertThat("The getAllTopics response must contains only 2 items because the zkUtils returns 2 items", allTopics.size(), Is.is(2));
+        assertThat("The getAllTopics response must contains RTopic-1 because the zkUtils returns it", allTopics, hasItem("RTopic-1"));
+        assertThat("The getAllTopics response must contains ELaTopic-2 because the zkUtils returns it", allTopics, hasItem("ELaTopic-2"));
+    }
+
+    @Test
+    public void when_I_kafka_has_no_topics_and_I_getAllTopics_then_I_get_a_empty_list_of_topics() {
+        List<String> allTopics = topicService.getAllTopics();
+        assertThat("The getAllTopics response must notcontains items because the zkUtils returns null", allTopics.size(), Is.is(0));
+    }
 
     @Test(expected = TopicOperationException.class)
     public void when_I_get_topic_property_and_topic_does_not_exist_then_It_throw_an_exception() {
