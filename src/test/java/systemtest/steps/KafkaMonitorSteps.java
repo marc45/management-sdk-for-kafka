@@ -7,8 +7,9 @@ package systemtest.steps;
 
 import com.mcafee.dxl.streaming.operations.client.KafkaMonitor;
 import com.mcafee.dxl.streaming.operations.client.KafkaMonitorBuilder;
+import com.mcafee.dxl.streaming.operations.client.kafka.KFBrokerStatusName;
 import com.mcafee.dxl.streaming.operations.client.kafka.KFClusterStatusName;
-import com.mcafee.dxl.streaming.operations.client.kafka.entities.KFCluster;
+import com.mcafee.dxl.streaming.operations.client.kafka.entities.KFBroker;
 import org.jbehave.core.annotations.AfterScenario;
 import org.jbehave.core.annotations.AfterStory;
 import org.jbehave.core.annotations.BeforeScenario;
@@ -23,7 +24,6 @@ import systemtest.util.DockerCompose;
 public class KafkaMonitorSteps {
     private final DockerCompose docker;
     private KafkaMonitor kfMonitor;
-    private KFCluster kfCluster;
     private String kfEndpoints;
     private String zkEndpoints;
 
@@ -37,7 +37,7 @@ public class KafkaMonitorSteps {
     }
 
     @BeforeScenario
-    public void beforeScenario() throws InterruptedException {
+    public void beforeScenario() {
         docker.startContainers();
     }
 
@@ -48,7 +48,6 @@ public class KafkaMonitorSteps {
 
     @AfterStory
     public void afterStory() {
-        docker.removeContainers();
     }
 
 
@@ -67,6 +66,8 @@ public class KafkaMonitorSteps {
 
         kfMonitor = new KafkaMonitorBuilder(kfEndpoints,zkEndpoints)
                 .withZookeeperSessionTimeout(500)
+                .withKafkaPollingInitialDelayTime(0)
+                .withKafkaPollingDelayTime(500)
                 .build();
         kfMonitor.start();
         while(kfMonitor.getHealth() != KFClusterStatusName.OK) {
@@ -74,13 +75,74 @@ public class KafkaMonitorSteps {
         }
     }
 
-    @When("I ask for Kafka cluster")
-    public void whenIAskForCluster(){
-        kfCluster = kfMonitor.getCluster();
+
+    @Then("Kafka cluster status is $status")
+    public void IReceiveTheClusterAndItsStatus(@Named("$status") String status) throws InterruptedException {
+        switch (status) {
+            case "OK":
+                while(kfMonitor.getCluster().getKfClusterStatus() != KFClusterStatusName.OK) {
+                    Thread.sleep(500);
+                }
+                Assert.assertTrue(kfMonitor.getCluster().getKfClusterStatus() == KFClusterStatusName.OK);
+                break;
+            case "WARNING":
+                while(kfMonitor.getCluster().getKfClusterStatus() != KFClusterStatusName.WARNING) {
+                    Thread.sleep(500);
+                }
+                Assert.assertTrue(kfMonitor.getCluster().getKfClusterStatus() == KFClusterStatusName.WARNING);
+                break;
+            case "DOWN":
+                while(kfMonitor.getCluster().getKfClusterStatus() != KFClusterStatusName.DOWN) {
+                     Thread.sleep(500);
+                }
+                Assert.assertTrue(kfMonitor.getCluster().getKfClusterStatus() == KFClusterStatusName.DOWN);
+                break;
+            default:
+                break;
+        }
     }
 
-    @Then("Kafka cluster status is ok")
-    public void IReceiveTheClusterAndItsStatusIsOK() {
-        Assert.assertTrue(kfCluster.getKfClusterStatus() == KFClusterStatusName.OK);
+    @When("I stop $kfBrokerName broker")
+    public void whenIStopAKafkaBroker(@Named("$kfBrokerName") String kfBrokerName) throws InterruptedException {
+        docker.stopNode(kfBrokerName);
+        while(kfMonitor.getHealth() == KFClusterStatusName.OK) {
+            Thread.sleep(500);
+        }
+
+        while(true) {
+            for (KFBroker kfBroker : kfMonitor.getCluster().getKFBrokers() ){
+                if(kfBroker.getBrokerName().equals(kfBrokerName)) {
+                    if(kfBroker.getStatus() == KFBrokerStatusName.DOWN){
+                        return;
+                    }
+                }
+            };
+            Thread.sleep(500);
+        }
+
+
     }
+
+    @Then("$kfBrokerName broker is UP")
+    public void thenKafkaBrokerIsUP(@Named("$kfBrokerName") String kfBrokerName) {
+
+        kfMonitor.getCluster().getKFBrokers().forEach(kfBroker -> {
+            if(kfBroker.getBrokerName().equals(kfBrokerName)) {
+                Assert.assertTrue(kfBroker.getStatus() == KFBrokerStatusName.UP);
+            }
+        });
+
+    }
+
+    @Then("$kfBrokerName broker is DOWN")
+    public void thenKafkaBrokerIsDOWN(@Named("$kfBrokerName") String kfBrokerName) {
+
+        kfMonitor.getCluster().getKFBrokers().forEach(kfBroker -> {
+            if(kfBroker.getBrokerName().equals(kfBrokerName)) {
+                Assert.assertTrue(kfBroker.getStatus() == KFBrokerStatusName.DOWN);
+            }
+        });
+
+    }
+
 }

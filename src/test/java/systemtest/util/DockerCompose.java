@@ -13,6 +13,7 @@ import com.github.dockerjava.api.model.Volume;
 import com.github.dockerjava.core.DefaultDockerClientConfig;
 import com.github.dockerjava.core.DockerClientBuilder;
 import com.github.dockerjava.core.DockerClientConfig;
+import com.github.dockerjava.core.command.WaitContainerResultCallback;
 
 public class DockerCompose {
 
@@ -32,7 +33,7 @@ public class DockerCompose {
         try {
             dockerClient
                     .createContainerCmd("docker-registry-2.pcorp.fastpoc.net:5000/databus/zookeeper:3.4.8")
-                    .withEnv(new String[]{"SERVER_ID=1", "MAX_SERVERS=3","MIN_SESSION_TIMEOUT=500", "MAX_SESSION_TIMEOUT=1000"})
+                    .withEnv(new String[]{"SERVER_ID=1", "MAX_SERVERS=3","MIN_SESSION_TIMEOUT=250", "MAX_SESSION_TIMEOUT=250"})
                     .withExposedPorts(ExposedPort.tcp(2181))
                     .withNetworkMode("host")
                     .withHostName("zookeeper-1")
@@ -44,7 +45,7 @@ public class DockerCompose {
         try {
             dockerClient
                     .createContainerCmd("docker-registry-2.pcorp.fastpoc.net:5000/databus/zookeeper:3.4.8")
-                    .withEnv(new String[]{"SERVER_ID=2", "MAX_SERVERS=3","MIN_SESSION_TIMEOUT=500", "MAX_SESSION_TIMEOUT=1000"})
+                    .withEnv(new String[]{"SERVER_ID=2", "MAX_SERVERS=3","MIN_SESSION_TIMEOUT=250", "MAX_SESSION_TIMEOUT=250"})
                     .withExposedPorts(ExposedPort.tcp(2181))
                     .withNetworkMode("host")
                     .withHostName("zookeeper-2")
@@ -57,7 +58,7 @@ public class DockerCompose {
         try {
             dockerClient
                     .createContainerCmd("docker-registry-2.pcorp.fastpoc.net:5000/databus/zookeeper:3.4.8")
-                    .withEnv(new String[]{"SERVER_ID=3", "MAX_SERVERS=3","MIN_SESSION_TIMEOUT=500", "MAX_SESSION_TIMEOUT=1000"})
+                    .withEnv(new String[]{"SERVER_ID=3", "MAX_SERVERS=3","MIN_SESSION_TIMEOUT=250", "MAX_SESSION_TIMEOUT=250"})
                     .withExposedPorts(ExposedPort.tcp(2181))
                     .withNetworkMode("host")
                     .withHostName("zookeeper-3")
@@ -76,7 +77,8 @@ public class DockerCompose {
                             "KAFKA_BROKER_ID=1",
                             "KAFKA_LISTENERS=PLAINTEXT://kafka-1:9092",
                             "KAFKA_LOG_DIRS=/tmp/kafka1-logs",
-                            "KAFKA_ZOOKEEPER_SESSION_TIMEOUT_MS=1000"
+                            "KAFKA_ZOOKEEPER_SESSION_TIMEOUT_MS=250",
+                            "KAFKA_ZOOKEEPER_CONNECTION_TIMEOUT_MS=6000"
                     })
                     .withExposedPorts(ExposedPort.tcp(9092))
                     .withNetworkMode("host")
@@ -97,7 +99,8 @@ public class DockerCompose {
                             "KAFKA_BROKER_ID=2",
                             "KAFKA_LISTENERS=PLAINTEXT://kafka-2:9092",
                             "KAFKA_LOG_DIRS=/tmp/kafka2-logs",
-                            "KAFKA_ZOOKEEPER_SESSION_TIMEOUT_MS=1000"
+                            "KAFKA_ZOOKEEPER_SESSION_TIMEOUT_MS=250",
+                            "KAFKA_ZOOKEEPER_CONNECTION_TIMEOUT_MS=6000"
                     })
                     .withExposedPorts(ExposedPort.tcp(9092))
                     .withNetworkMode("host")
@@ -118,7 +121,8 @@ public class DockerCompose {
                             "KAFKA_BROKER_ID=3",
                             "KAFKA_LISTENERS=PLAINTEXT://kafka-3:9092",
                             "KAFKA_LOG_DIRS=/tmp/kafka3-logs",
-                            "KAFKA_ZOOKEEPER_SESSION_TIMEOUT_MS=1000"
+                            "KAFKA_ZOOKEEPER_SESSION_TIMEOUT_MS=250",
+                            "KAFKA_ZOOKEEPER_CONNECTION_TIMEOUT_MS=6000"
                     })
                     .withExposedPorts(ExposedPort.tcp(9092))
                     .withNetworkMode("host")
@@ -161,8 +165,11 @@ public class DockerCompose {
             }
             try {
                 dockerClient.startContainerCmd("zookeeper-3").exec();
+
             } catch(NotModifiedException e) {
             }
+            Thread.sleep(2000);
+
             try {
                 dockerClient.startContainerCmd("kafka-1").exec();
             } catch(NotModifiedException e) {
@@ -210,8 +217,19 @@ public class DockerCompose {
         System.out.println("Waiting ZK deregister Kafka....");
     }
 
-    public void stopZookeeper1() {
-        System.out.println("Stoping container zookeeper-1...");
-        dockerClient.stopContainerCmd("zookeeper-1").exec();
+    public void stopNode(String nodeName) {
+
+
+        try {
+            dockerClient.stopContainerCmd(nodeName).exec();
+            dockerClient.waitContainerCmd(nodeName)
+                    .exec(new WaitContainerResultCallback())
+                    .awaitStatusCode();
+
+        } catch (NotModifiedException e) {
+            System.out.println("There is a problem stopping the container " + nodeName + " ERROR:" + e.getMessage());
+        }
+
     }
+
 }

@@ -6,11 +6,10 @@ package systemtest.steps;
 
 
 import com.mcafee.dxl.streaming.operations.client.ZookeeperMonitor;
-import com.mcafee.dxl.streaming.operations.client.configuration.PropertyNames;
+import com.mcafee.dxl.streaming.operations.client.ZookeeperMonitorBuilder;
 import com.mcafee.dxl.streaming.operations.client.zookeeper.ZKClusterHealthName;
 import com.mcafee.dxl.streaming.operations.client.zookeeper.ZKClusterStatusName;
 import com.mcafee.dxl.streaming.operations.client.zookeeper.ZKNodeStatusName;
-import com.mcafee.dxl.streaming.operations.client.zookeeper.entities.ZKCluster;
 import com.mcafee.dxl.streaming.operations.client.zookeeper.entities.ZKNode;
 import org.jbehave.core.annotations.AfterScenario;
 import org.jbehave.core.annotations.AfterStory;
@@ -23,16 +22,11 @@ import org.jbehave.core.annotations.When;
 import org.junit.Assert;
 import systemtest.util.DockerCompose;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 public class ZookeeperMonitorSteps  {
 
     private final DockerCompose docker;
     private String zkEndpoints;
     private ZookeeperMonitor zkMonitor;
-    private ZKCluster zkCluster;
 
     public ZookeeperMonitorSteps() {
         docker = new DockerCompose();
@@ -42,17 +36,19 @@ public class ZookeeperMonitorSteps  {
     public void beforeStory() {
         docker.createContainers();
     }
+
     @BeforeScenario
-    public void beforeScenario() throws InterruptedException {
+    public void beforeScenario() {
         docker.startContainers();
     }
+
     @AfterScenario
     public void afterScenario() {
-        zkMonitor.stop();
     }
+
     @AfterStory
     public void afterStory() {
-        docker.removeContainers();
+
     }
 
 
@@ -64,42 +60,70 @@ public class ZookeeperMonitorSteps  {
 
     @When("I start Zookeeper monitoring")
     public void whenIStartZookeeperMonitoring() throws InterruptedException {
-        Map<String, String> configuration = new HashMap<>();
-        configuration.put(PropertyNames.ZK_SERVERS.getPropertyName(),zkEndpoints);
-        zkMonitor = new ZookeeperMonitor(configuration);
+        zkMonitor = new ZookeeperMonitorBuilder(zkEndpoints)
+                .withZKSessionTimeout(500)
+                .withZKPollingInitialDelayTime(0)
+                .withZKPollingDelayTime(500)
+                .build();
         zkMonitor.start();
         while(zkMonitor.getHealth() != ZKClusterHealthName.OK) {
             Thread.sleep(500);
         }
     }
 
-    @When("I stop a Zookeeper node")
-    public void whenIStopAZookeeperNode() throws InterruptedException {
-        docker.stopZookeeper1();
-        while(zkMonitor.getHealth() != ZKClusterHealthName.WARNING) {
+    @When("I stop $zkNodeName node")
+    public void whenIStopAZookeeperNode(@Named("$zkNodeName") String zkNodeName) throws InterruptedException {
+        docker.stopNode(zkNodeName);
+
+        while(zkMonitor.getHealth() == ZKClusterHealthName.OK) {
             Thread.sleep(500);
+        }
+
+        while(true) {
+            for(ZKNode zkNode : zkMonitor.getCluster().getZKNodes()) {
+                if(zkNode.getZKNodeId().equals(zkNodeName)){
+                    if(zkNode.getZkNodeStatus() == ZKNodeStatusName.DOWN) {
+                        return;
+                    }
+                }
+            };
+            Thread.sleep(500);
+        }
+     }
+
+
+    @Then("Zookeeper cluster has quorum")
+    public void thenZookeeperClusterHasQuorum() throws InterruptedException {
+        while(zkMonitor.getCluster().getZookeeperClusterStatus() != ZKClusterStatusName.QUORUM) {
+            Thread.sleep(500);
+        }
+        Assert.assertTrue(zkMonitor.getCluster().getZookeeperClusterStatus() == ZKClusterStatusName.QUORUM);
+    }
+
+    @Then("$zkNodeName node is DOWN")
+    public void thenZookeeperNodeIsDOWN(@Named("$zkNodeName") String zkNodeName) throws InterruptedException {
+        for(ZKNode zkNode : zkMonitor.getCluster().getZKNodes()) {
+            if(zkNode.getZKNodeId().equals(zkNodeName+":2181")){
+                Assert.assertTrue(zkNode.getZkNodeStatus() == ZKNodeStatusName.DOWN);
+            }
         }
     }
 
-    @When("I ask for Zookeeper cluster")
-    public void whenIAskForCluster(){
-        zkCluster = zkMonitor.getCluster();
-    }
-
-    @Then("Zookeeper cluster has quorum")
-    public void IReceiveTheClusterAndItsStatusIsOK() {
-        Assert.assertTrue(zkCluster.getZookeeperClusterStatus() == ZKClusterStatusName.QUORUM);
-    }
-
-    @Then("Zookeeper cluster has quorum but there is a node down")
-    public void IReceiveTheClusterAndItsStatusIsWarning() {
-        Assert.assertTrue(zkCluster.getZookeeperClusterStatus() == ZKClusterStatusName.QUORUM);
-
-        final List<ZKNode> zkNodes = zkCluster.getZKNodes();
-        zkNodes.forEach(zkNode -> {
-            if(zkNode.getZKNodeId().equals("zookeeper-1:2181")){
-                Assert.assertTrue(zkNode.getZkNodeStatus() == ZKNodeStatusName.DOWN);
+    @Then("$zkNodeName node is UP")
+    public void thenZookeeperNodeIsUP(@Named("$zkNodeName") String zkNodeName) throws InterruptedException {
+        for(ZKNode zkNode : zkMonitor.getCluster().getZKNodes()) {
+            if(zkNode.getZKNodeId().equals(zkNodeName+":2181")){
+                Assert.assertTrue(zkNode.getZkNodeStatus() == ZKNodeStatusName.UP);
             }
-        });
+        }
+    }
+
+    @Then("Zookeeper cluster does not have quorum")
+    public void thenZookeeperDoesNothaveQuorum() throws InterruptedException {
+         while(zkMonitor.getCluster().getZookeeperClusterStatus() != ZKClusterStatusName.NO_QUORUM) {
+             Thread.sleep(500);
+        }
+        Assert.assertTrue(zkMonitor.getCluster().getZookeeperClusterStatus() == ZKClusterStatusName.NO_QUORUM);
+
     }
 }
