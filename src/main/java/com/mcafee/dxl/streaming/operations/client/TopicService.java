@@ -80,6 +80,27 @@ public class TopicService implements AutoCloseable {
 
 
     /**
+     * Create a topic
+     *
+     * @param topicName         Topic name
+     * @param partitions        The number of partitions for the topic being created
+     * @param replicationFactor The replication factor for each partition in the topic being created
+     * @throws IllegalArgumentException if any argument is invalid
+     * @throws TopicOperationException  when it could not create a topic
+     * @throws com.mcafee.dxl.streaming.operations.client.exception.ConnectionException if Zookeeper connection fails
+     */
+    public void createTopic(final String topicName,
+                            final int partitions,
+                            final int replicationFactor) {
+
+        clusterTools.createTopic(getConnection(),
+                topicName,
+                partitions,
+                replicationFactor,
+                new Properties());
+    }
+
+    /**
      * Get all the topics
      *
      * @return a list of all topics. If no topics are available, a empty list is returned.

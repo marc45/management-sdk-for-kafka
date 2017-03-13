@@ -5,7 +5,6 @@ import com.mcafee.dxl.streaming.operations.client.TopicServiceBuilder;
 import com.mcafee.dxl.streaming.operations.client.exception.TopicOperationException;
 
 import java.time.Instant;
-import java.util.Properties;
 
 /**
  * It created a topic by using a topic name based on current time.
@@ -76,8 +75,7 @@ public class CreateTopicExample {
             if(!topicService.topicExists(topicName)) {
                 topicService.createTopic(topicName,
                         PARTITIONS,
-                        REPLICATION_FACTOR,
-                        new Properties());
+                        REPLICATION_FACTOR);
                 System.out.println("Topic Created: " + topicName);
             } else {
                 System.out.println("Topic already exists: " + topicName);
