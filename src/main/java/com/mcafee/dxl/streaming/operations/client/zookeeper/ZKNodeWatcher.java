@@ -186,10 +186,10 @@ public class ZKNodeWatcher {
         if (previousStatus.getStatus() != zkNodeStatus.get().getStatus()) {
             switch(zkNodeStatus.get().getStatus()) {
                 case UP:
-                    zkMonitorListener.onNodeUp(zkNodeAddress.getHostString() +":"+ zkNodeAddress.getPort());
+                    zkMonitorListener.onNodeUp(zkNodeAddress.getHostString());
                     break;
                 case DOWN:
-                    zkMonitorListener.onNodeDown(zkNodeAddress.getHostString() +":"+ zkNodeAddress.getPort());
+                    zkMonitorListener.onNodeDown(zkNodeAddress.getHostString());
                     break;
                 default:
             }
