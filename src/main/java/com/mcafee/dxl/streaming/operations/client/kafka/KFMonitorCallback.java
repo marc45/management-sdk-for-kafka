@@ -27,4 +27,10 @@ public interface KFMonitorCallback {
      */
     void onBrokerDown(final String zkBrokerName);
 
+    /**
+     * It is called when a Kafka broker is up but it is not registered in Zookeeper
+     *
+     * @param zkBrokerName Kafka broker name
+     */
+    void onBrokerWarning(final String zkBrokerName);
 }

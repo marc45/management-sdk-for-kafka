@@ -15,6 +15,11 @@ public enum KFBrokerStatusName {
     UP,
 
     /**
+     * Kafka broker endpoint is reachable but it is not registered in Zookeeper
+     */
+    WARNING,
+
+    /**
      * Kafka broker endpoint is unreachable
      */
     DOWN

@@ -25,6 +25,8 @@ public class KFMonitorPollingStatusExample {
     private static final String KAFKA_SERVER_HOST_NAMES = "kafka-1:9092,kafka-2:9092,kafka-3:9092";
     private static final int ZOOKEEPER_SESSION_TIME_OUT_MS = 8000;
     private static final long TWO_SECONDS = 2000;
+    private static final int ZOOKEEPER_POLL_DELAY_TIME_MS = 1000;
+
 
     private final AtomicBoolean stopped = new AtomicBoolean(false);
     private final KafkaMonitor kfMonitor;
@@ -40,6 +42,8 @@ public class KFMonitorPollingStatusExample {
         // Create a Zookeeper Monitor using Builder helper
         kfMonitor = new KafkaMonitorBuilder(KAFKA_SERVER_HOST_NAMES, ZOOKEEPER_SERVER_HOST_NAMES)
                 .withZookeeperSessionTimeout(ZOOKEEPER_SESSION_TIME_OUT_MS)
+                .withKafkaPollingInitialDelayTime(0)
+                .withKafkaPollingDelayTime(ZOOKEEPER_POLL_DELAY_TIME_MS)
                 .build();
 
         this.executor = Executors.newFixedThreadPool(1);
@@ -99,7 +103,6 @@ public class KFMonitorPollingStatusExample {
 
     }
 }
-
 }
  </pre>
  */
@@ -110,6 +113,8 @@ public class KFMonitorPollingStatusExample {
     private static final String KAFKA_SERVER_HOST_NAMES = "kafka-1:9092,kafka-2:9092,kafka-3:9092";
     private static final int ZOOKEEPER_SESSION_TIME_OUT_MS = 8000;
     private static final long TWO_SECONDS = 2000;
+    private static final int ZOOKEEPER_POLL_DELAY_TIME_MS = 1000;
+
 
     private final AtomicBoolean stopped = new AtomicBoolean(false);
     private final KafkaMonitor kfMonitor;
@@ -125,6 +130,8 @@ public class KFMonitorPollingStatusExample {
         // Create a Zookeeper Monitor using Builder helper
         kfMonitor = new KafkaMonitorBuilder(KAFKA_SERVER_HOST_NAMES, ZOOKEEPER_SERVER_HOST_NAMES)
                 .withZookeeperSessionTimeout(ZOOKEEPER_SESSION_TIME_OUT_MS)
+                .withKafkaPollingInitialDelayTime(0)
+                .withKafkaPollingDelayTime(ZOOKEEPER_POLL_DELAY_TIME_MS)
                 .build();
 
         this.executor = Executors.newFixedThreadPool(1);

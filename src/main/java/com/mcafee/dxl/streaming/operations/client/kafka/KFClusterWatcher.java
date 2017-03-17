@@ -4,21 +4,16 @@
 
 package com.mcafee.dxl.streaming.operations.client.kafka;
 
-import com.mcafee.dxl.streaming.operations.client.common.ClusterConnection;
-import com.mcafee.dxl.streaming.operations.client.common.ClusterTools;
 import com.mcafee.dxl.streaming.operations.client.common.HostAdapter;
 import com.mcafee.dxl.streaming.operations.client.configuration.ConfigHelp;
 import com.mcafee.dxl.streaming.operations.client.configuration.PropertyNames;
 import com.mcafee.dxl.streaming.operations.client.kafka.entities.KFBroker;
-import com.mcafee.dxl.streaming.operations.client.kafka.entities.KFBrokerMetadata;
 import com.mcafee.dxl.streaming.operations.client.kafka.entities.KFCluster;
 import com.mcafee.dxl.streaming.operations.client.zookeeper.ZKConnection;
-import kafka.cluster.Broker;
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.WatchedEvent;
 import org.apache.zookeeper.Watcher;
 import org.apache.zookeeper.ZooKeeper;
-import scala.collection.JavaConversions;
 
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
@@ -44,7 +39,7 @@ public final class KFClusterWatcher implements Watcher {
      * Class constants
      */
     private static final String KAFKA_BROKERS_ZNODE_PATH = "/brokers/ids";
-    private static final long WATCHER_SLEEP_TIME = 5000;
+    private static final long WATCHER_SLEEP_TIME_MS = 5000;
 
 
     /**
@@ -106,6 +101,11 @@ public final class KFClusterWatcher implements Watcher {
             public void onBrokerDown(final String zkBrokerName) {
 
             }
+
+            @Override
+            public void onBrokerWarning(final String zkBrokerName) {
+
+            }
         });
 
         // Create Kafka broker watchers
@@ -148,7 +148,7 @@ public final class KFClusterWatcher implements Watcher {
         }
         brokerWatchers.forEach(brokerWatcher -> brokerWatcher.startMonitoring());
         openZKConnection();
-        initializeWatcherAsync();
+        setupWatcherAsync();
     }
 
 
@@ -200,14 +200,16 @@ public final class KFClusterWatcher implements Watcher {
         }
 
         long brokerDownCounter = getNumberOfKafkaBrokersDown();
+        long brokerWarningCount = getNumberOfKafkaBrokersWarning();
 
         if (brokerDownCounter == brokerWatchers.size()) {
             return KFClusterStatusName.DOWN;
-        } else if (brokerDownCounter == 0) {
+        } else if (brokerDownCounter == 0 && brokerWarningCount == 0) {
             return KFClusterStatusName.OK;
         } else {
             return KFClusterStatusName.WARNING;
         }
+
     }
 
 
@@ -222,9 +224,17 @@ public final class KFClusterWatcher implements Watcher {
     }
 
 
+    private long getNumberOfKafkaBrokersWarning() {
+        return brokerWatchers
+                .stream()
+                .filter(broker -> broker.getStatus() == KFBrokerStatusName.WARNING)
+                .count();
+    }
+
     /**
-     * It listen to Zookeeper session events.
-     * It is called automatically by Zookeeper when a Kafka broker znode has appeared/disappeared.
+     * It listen to Zookeeper events.
+     * It is called automatically by Zookeeper when a Kafka broker znode has appeared/disappeared or
+     * session connect/disconnect
      *
      * @param event {@link WatchedEvent} instance sent by Zookeeper node
      */
@@ -236,10 +246,10 @@ public final class KFClusterWatcher implements Watcher {
         }
 
         if (event.getType() != Event.EventType.None) {
-            initializeWatcherAsync(); // Must initialize the watcher because it is one-shot.
+            setupWatcherAsync(); // Must initialize the watcher because it is one-shot.
             switch (event.getType()) {
-                case NodeChildrenChanged: // Oops! A kafka broker has appeared / disappeared
-                    updateBrokers();      // Force to update brokers' status
+                case NodeChildrenChanged:   // A kafka broker has appeared / disappeared
+                    updateBrokerStatus();   // Force to update brokers' status
                     break;
 
                 default:
@@ -247,7 +257,11 @@ public final class KFClusterWatcher implements Watcher {
         } else {
             switch (event.getState()) {
                 case SyncConnected:
-                    updateMetadataBrokers(); // Zookeeper has quorum, then lets brokers update metadata
+                case Disconnected:
+                    updateBrokerStatus();   // Force to update brokers' status
+                    break;
+                case Expired:
+                    restartZKConnection();  // ZK connection has expired, let's reconnect
                     break;
 
                 default:
@@ -255,12 +269,6 @@ public final class KFClusterWatcher implements Watcher {
         }
     }
 
-    /**
-     * Force to each broker watcher to update ist metadata
-     */
-    private void updateMetadataBrokers() {
-        brokerWatchers.forEach(brokerWatcher -> brokerWatcher.updateMetadataAsync());
-    }
 
     /**
      * Close Zookeeper connection
@@ -289,68 +297,30 @@ public final class KFClusterWatcher implements Watcher {
 
 
     /**
-     * Get a list of registered Kafka broker.
-     * If the connection has failed or any other exception is thrown, it return an empty list
-     *
-     * @return list of registered Kafka brokers
+     * Close and Open zookeeper connection
      */
-    private List<Broker> getRegisteredKafkaBrokers() {
-        try (ClusterConnection cnx = new ClusterConnection(zkConnectionString,
-                PropertyNames.ZK_CONNECTION_TIMEOUT_MS.
-                        getDefaultValue(), String.valueOf(zkSessionTimeout))) {
-
-            final ClusterTools clusterTools = new ClusterTools();
-            return clusterTools.getKafkaBrokers(cnx.getConnection());
-        } catch (Exception e) {
-        }
-        return new ArrayList<>();
+    private void restartZKConnection() {
+        closeConnection();
+        openZKConnection();
+        setupWatcherAsync();
     }
 
     /**
-     * Get Kafka broker metadata for a specific address
-     *
-     * @param kafkaBrokers    list of registered Kafka brokers
-     * @param kfBrokerAddress address to look for
-     * @return Kafka broker metadata
-     */
-    private KFBrokerMetadata getBrokerMetadataByAddress(final List<Broker> kafkaBrokers,
-                                                        final InetSocketAddress kfBrokerAddress) {
-
-        KFBrokerMetadata brokerMetadata = new KFBrokerMetadata();
-
-        kafkaBrokers.forEach(broker -> {
-            JavaConversions.mapAsJavaMap(broker.endPoints())
-                    .forEach((protocol, endpoint) -> {
-                        if (endpoint.host().equals(kfBrokerAddress.getHostName())
-                                && endpoint.port() == kfBrokerAddress.getPort()) {
-                            brokerMetadata.setBrokerId(broker.id());
-                            brokerMetadata.setHost(endpoint.host());
-                            brokerMetadata.setPort(endpoint.port());
-                            brokerMetadata.setConnectionString(endpoint.connectionString());
-                            brokerMetadata.setSecurityProtocol(protocol.name);
-                        }
-                    });
-        });
-        return brokerMetadata;
-    }
-
-
-    /**
-     * Try to initialize a Zookeeper watcher for znode path where Kafka brokers are registered
+     * Try to setup a Zookeeper watcher for znode path where Kafka brokers are registered
      * Kafka brokers are registered under /brokers/ids
      * <p>
      * If Zookeeer cluster has not quorum it will sleep for a while then will retry.
      */
-    private void initializeWatcherAsync() {
-        ExecutorService executor = Executors.newSingleThreadExecutor();
+    private void setupWatcherAsync() {
+        final ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.submit(() -> {
             boolean isLooping = true;
             while (isLooping) {
                 try {
                     zkClient.getChildren(KAFKA_BROKERS_ZNODE_PATH, true); // Set the watcher
                     isLooping = false;
-                } catch (KeeperException e) { // Zookeeper is not on-line
-                    justWait(WATCHER_SLEEP_TIME);
+                } catch (KeeperException e) { // Zookeeper is off line
+                    justWait(WATCHER_SLEEP_TIME_MS);
                 } catch (InterruptedException e) {
                     isLooping = false;
                 }
@@ -375,8 +345,8 @@ public final class KFClusterWatcher implements Watcher {
     /**
      * Asks to Kafka brokers to update its status
      */
-    private void updateBrokers() {
-        brokerWatchers.forEach(brokerWatcher -> brokerWatcher.updateStatus());
+    private void updateBrokerStatus() {
+        brokerWatchers.forEach(brokerWatcher -> brokerWatcher.updateStatusAsync());
     }
 
 }

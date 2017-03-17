@@ -54,6 +54,8 @@ public class ZookeeperMonitorEventSteps  {
 
     @AfterStory
     public void afterStory() {
+        docker.stopContainers();
+        docker.removeContainers();
     }
 
     @Given("a list of Zookeeper endpoints $zkEndpoints")

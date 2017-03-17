@@ -13,10 +13,6 @@ import java.util.List;
  */
 public final class ZKNodeWatchersBuilder {
 
-    private static final java.lang.String COMMA_SYMBOL = ",";
-    private static final java.lang.String COLON_SYMBOL = ":";
-
-
     private ZKNodeWatchersBuilder() {
     }
 

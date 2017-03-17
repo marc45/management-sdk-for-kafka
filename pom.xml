@@ -5,8 +5,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.mcafee.dxl.streaming.operations.client</groupId>
-    <artifactId>databus-mgmt-sdk</artifactId>
-    <version>0.0.1</version>
+    <artifactId>msdk4kafka</artifactId>
+    <version>0.9.0</version>
 
     <dependencies>
         <dependency>

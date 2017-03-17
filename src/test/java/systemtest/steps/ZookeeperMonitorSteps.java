@@ -48,7 +48,8 @@ public class ZookeeperMonitorSteps  {
 
     @AfterStory
     public void afterStory() {
-
+        docker.stopContainers();
+        docker.removeContainers();
     }
 
 

@@ -21,7 +21,7 @@ import java.util.concurrent.TimeUnit;
 
  <pre>
  {@code
- public class ZKMonitorPollingAndEventListenerExample {
+public class ZKMonitorPollingAndEventListenerExample {
 
     private static final String ZOOKEEPER_SERVER_HOST_NAMES = "zookeeper-1:2181,zookeeper-2:2181,zookeeper-3:2181";
     private static final int ZOOKEEPER_SESSION_TIME_OUT_MS = 8000;
@@ -77,7 +77,7 @@ import java.util.concurrent.TimeUnit;
     }
 
     // Get the status
-    private void printStatus() {
+    private void printStatus(final String eventAsString) {
         final ZKCluster zookeeperCluster = zkMonitor.getCluster();
 
         StringBuilder msg = new StringBuilder();
@@ -85,45 +85,36 @@ import java.util.concurrent.TimeUnit;
             msg.append("  " + zkNode.getZKNodeId() + " " + zkNode.getZkNodeStatus());
 
         });
-        System.out.println(LocalDateTime.now() + " [STATUS] " + zookeeperCluster.getZookeeperClusterStatus() + msg.toString());
+        System.out.println(LocalDateTime.now() +
+                " [EVENT] " + eventAsString +
+                " [STATUS] " + zookeeperCluster.getZookeeperClusterStatus() +  msg.toString());
     }
 
-    private String getMode(final String zkNodeStatistics) {
-        try {
-            final int mode = zkNodeStatistics.indexOf("Mode");
-            final String s1 = zkNodeStatistics.substring(mode);
-            final String s2 = s1.substring(0, s1.indexOf('\n'));
-            return s2.split(":")[1].trim();
-
-        } catch (Exception e) {
-            return "";
-        }
-    }
 
     //  This class listen to Zookeeper Monitor Events
     //  Each time Zookeeper quorum changes or a Zookeeper broker goes down/up, the corresponding method handler is called.
     private class EventPrinterCallback implements ZKMonitorCallback {
 
         public void onNodeUp(final String zkNodeName) {
-            printStatus();
+            printStatus("onNodeUp " + zkNodeName);
         }
 
         public void onNodeDown(final String zkNodeName) {
-            printStatus();
+            printStatus("onNodeDown " + zkNodeName);
         }
 
         public void onGetQuorum() {
-            printStatus();
+            printStatus("onGetQuorum ");
         }
 
         public void onLackOfQuorum() {
-            printStatus();
+            printStatus("onLackOfQuorum ");
         }
 
     }
 }
-
- } </pre>
+ }
+ </pre>
  */
 
 public class ZKMonitorPollingAndEventListenerExample {
@@ -182,7 +173,7 @@ public class ZKMonitorPollingAndEventListenerExample {
     }
 
     // Get the status
-    private void printStatus() {
+    private void printStatus(final String eventAsString) {
         final ZKCluster zookeeperCluster = zkMonitor.getCluster();
 
         StringBuilder msg = new StringBuilder();
@@ -190,20 +181,11 @@ public class ZKMonitorPollingAndEventListenerExample {
             msg.append("  " + zkNode.getZKNodeId() + " " + zkNode.getZkNodeStatus());
 
         });
-        System.out.println(LocalDateTime.now() + " [STATUS] " + zookeeperCluster.getZookeeperClusterStatus() + msg.toString());
+        System.out.println(LocalDateTime.now() +
+                " [EVENT] " + eventAsString +
+                " [STATUS] " + zookeeperCluster.getZookeeperClusterStatus() +  msg.toString());
     }
 
-    private String getMode(final String zkNodeStatistics) {
-        try {
-            final int mode = zkNodeStatistics.indexOf("Mode");
-            final String s1 = zkNodeStatistics.substring(mode);
-            final String s2 = s1.substring(0, s1.indexOf('\n'));
-            return s2.split(":")[1].trim();
-
-        } catch (Exception e) {
-            return "";
-        }
-    }
 
     //  This class listen to Zookeeper Monitor Events
     //  Each time Zookeeper quorum changes or a Zookeeper broker goes down/up, the corresponding method handler is called.
@@ -211,22 +193,22 @@ public class ZKMonitorPollingAndEventListenerExample {
 
         @Override
         public void onNodeUp(final String zkNodeName) {
-            printStatus();
+            printStatus("onNodeUp " + zkNodeName);
         }
 
         @Override
         public void onNodeDown(final String zkNodeName) {
-            printStatus();
+            printStatus("onNodeDown " + zkNodeName);
         }
 
         @Override
         public void onGetQuorum() {
-            printStatus();
+            printStatus("onGetQuorum ");
         }
 
         @Override
         public void onLackOfQuorum() {
-            printStatus();
+            printStatus("onLackOfQuorum ");
         }
 
     }

@@ -87,6 +87,10 @@ public final class KFMonitorEventListenerExample {
         public void onBrokerDown(final String zkBrokerName) {
             System.out.println("[EVENT] Kafka broker DOWN: " + zkBrokerName);
         }
+
+        public void onBrokerWarning(final String zkBrokerName) {
+            System.out.println("[EVENT] Kafka broker WARNING: " + zkBrokerName);
+        }
     }
 }
 
@@ -162,6 +166,11 @@ public final class KFMonitorEventListenerExample {
         @Override
         public void onBrokerDown(final String zkBrokerName) {
             System.out.println("[EVENT] Kafka broker DOWN: " + zkBrokerName);
+        }
+
+        @Override
+        public void onBrokerWarning(final String zkBrokerName) {
+            System.out.println("[EVENT] Kafka broker WARNING: " + zkBrokerName);
         }
     }
 }

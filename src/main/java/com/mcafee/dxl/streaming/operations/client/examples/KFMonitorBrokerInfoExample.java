@@ -6,7 +6,6 @@ package com.mcafee.dxl.streaming.operations.client.examples;
 
 import com.mcafee.dxl.streaming.operations.client.KafkaMonitor;
 import com.mcafee.dxl.streaming.operations.client.KafkaMonitorBuilder;
-import com.mcafee.dxl.streaming.operations.client.kafka.KFClusterStatusName;
 import com.mcafee.dxl.streaming.operations.client.kafka.entities.KFCluster;
 
 /**
@@ -31,12 +30,8 @@ public class KFMonitorBrokerInfoExample {
             kfMonitor.start();
 
             System.out.println("Example started. Waiting for Kafka cluster being running...");
-            while (kfMonitor.getHealth() != KFClusterStatusName.OK) {
-                Thread.sleep(TWO_SECONDS);
-            }
 
             // Give time to load Kafka broker metadata
-            Thread.sleep(TWO_SECONDS);
             Thread.sleep(TWO_SECONDS);
 
             final KFCluster kfClusterStatus = kfMonitor.getCluster();
@@ -61,7 +56,6 @@ public class KFMonitorBrokerInfoExample {
 
     }
 }
-
 }
  </pre>
  */
@@ -83,12 +77,8 @@ public class KFMonitorBrokerInfoExample {
             kfMonitor.start();
 
             System.out.println("Example started. Waiting for Kafka cluster being running...");
-            while (kfMonitor.getHealth() != KFClusterStatusName.OK) {
-                Thread.sleep(TWO_SECONDS);
-            }
 
             // Give time to load Kafka broker metadata
-            Thread.sleep(TWO_SECONDS);
             Thread.sleep(TWO_SECONDS);
 
             final KFCluster kfClusterStatus = kfMonitor.getCluster();

@@ -4,11 +4,16 @@
 
 package systemtest.steps;
 
+import systemtest.util.DockerCompose;
+
+
+
 import com.mcafee.dxl.streaming.operations.client.KafkaMonitor;
 import com.mcafee.dxl.streaming.operations.client.KafkaMonitorBuilder;
 import com.mcafee.dxl.streaming.operations.client.TopicService;
 import com.mcafee.dxl.streaming.operations.client.TopicServiceBuilder;
 import com.mcafee.dxl.streaming.operations.client.kafka.KFClusterStatusName;
+
 import org.hamcrest.Matchers;
 import org.jbehave.core.annotations.AfterScenario;
 import org.jbehave.core.annotations.AfterStory;
@@ -18,14 +23,13 @@ import org.jbehave.core.annotations.Given;
 import org.jbehave.core.annotations.Named;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
+import org.junit.Assert;
 import systemtest.util.DockerCompose;
 
 import java.time.Instant;
 import java.util.Properties;
 
-import static org.junit.Assert.*;
-
-public class ManagementTopicSteps {
+public class CreateTopicSteps {
     private final DockerCompose docker;
     private KafkaMonitor kafkaMonitor;
     private String kfEndpoints;
@@ -35,9 +39,9 @@ public class ManagementTopicSteps {
     private int zKConnectionTimeout = 5000;
     private int zKSessionTimeout = 8000;
     private Properties topicProperties = new Properties();
-    private long isolator;
+    private String isolatedTopicName;
 
-    public ManagementTopicSteps() {
+    public CreateTopicSteps() {
         docker = new DockerCompose();
     }
 
@@ -48,8 +52,8 @@ public class ManagementTopicSteps {
 
     @BeforeScenario
     public void beforeScenario() {
-        isolator = Instant.now().getEpochSecond();
         docker.startContainers();
+        topicProperties = new Properties();
     }
 
     @AfterScenario
@@ -59,6 +63,8 @@ public class ManagementTopicSteps {
 
     @AfterStory
     public void afterStory() {
+        docker.stopContainers();
+        docker.removeContainers();
     }
 
 
@@ -77,15 +83,12 @@ public class ManagementTopicSteps {
         KafkaMonitor kafkaMonitor = new KafkaMonitorBuilder(kfEndpoints, zkEndpoints)
                 .withZookeeperSessionTimeout(1000)
                 .withKafkaPollingInitialDelayTime(0)
-                .withKafkaPollingDelayTime(500)
+                .withKafkaPollingDelayTime(1000)
                 .build();
         kafkaMonitor.start();
         while (kafkaMonitor.getCluster().getKfClusterStatus() != KFClusterStatusName.OK) {
             Thread.sleep(500);
         }
-        System.out.println("wait extra 20s until kafka are registered in ZK");
-        //TODO this must be removed when getKfClusterStatus is fixed.
-        Thread.sleep(20000);
     }
 
     @When("I set the partitions as $partitionNumber")
@@ -99,49 +102,47 @@ public class ManagementTopicSteps {
     }
 
     @When("I set the property $propertyName with the value $propertyValue")
-    public void Properties(@Named("$propertyName") String propertyName, @Named("$propertyValue") float propertyValue) {
+    public void Properties(@Named("$propertyName") String propertyName, @Named("$propertyValue") String propertyValue) {
         this.topicProperties.put(propertyName, propertyValue);
     }
 
     @When("I create a topic with isolated name $topicName")
     public void createATopic(String topicName) throws InterruptedException {
-        topicName = getIsolatedTopicName(topicName);
+
         try (TopicService topicService = new TopicServiceBuilder(zkEndpoints)
                 .withZKConnectionTimeout(zKConnectionTimeout)
                 .withZKSessionTimeout(zKSessionTimeout)
                 .build()) {
-            if (!topicService.topicExists(topicName)) {
-                topicProperties = new Properties();
-                topicService.createTopic(topicName,
-                        this.partitionNumber,
-                        this.replicationFactor,
-                        this.topicProperties);
-                System.out.println("Topic Created: " + topicName);
-            } else {
-                System.out.println("Topic already exists: " + topicName);
-            }
+            isolatedTopicName = getIsolatedTopicName(topicName);
+            topicService.createTopic(
+                    isolatedTopicName,
+                    this.partitionNumber,
+                    this.replicationFactor,
+                    this.topicProperties);
+
+            Assert.assertTrue(true);
         } catch (Exception e) {
             e.printStackTrace();
-            fail("ERROR: " + e.getMessage());
+            Assert.fail("ERROR: " + e.getMessage());
         }
     }
 
     @Then("I get all topics and the topic with isolated name $topicName is present")
     public void getAllTopicsContainsATopic(String topicName) throws InterruptedException {
-        String isolatedTopicName = getIsolatedTopicName(topicName);
         try (TopicService topicService = new TopicServiceBuilder(zkEndpoints)
                 .withZKConnectionTimeout(zKConnectionTimeout)
                 .withZKSessionTimeout(zKSessionTimeout)
                 .build()) {
-            assertThat("The just created topic: " + isolatedTopicName + " is expected to be in all topic list",
+            Assert.assertThat("The just created topic: " + isolatedTopicName + " is expected to be in all topic list",
                     topicService.getAllTopics().contains(isolatedTopicName), Matchers.is(true));
         } catch (Exception e) {
             e.printStackTrace();
-            fail("ERROR: " + e.getMessage());
+            Assert.fail("ERROR: " + e.getMessage());
+            Assert.fail("ERROR: " + e.getMessage());
         }
     }
 
     private String getIsolatedTopicName(String topicName) {
-        return topicName + isolator;
+        return topicName + Instant.now().getEpochSecond();
     }
 }

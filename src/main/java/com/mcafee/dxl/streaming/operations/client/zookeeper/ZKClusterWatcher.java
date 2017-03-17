@@ -28,7 +28,8 @@ public final class ZKClusterWatcher implements Watcher {
 
     private ZKMonitorCallback zkMonitorListener;
     private List<ZKNodeWatcher> zkNodeWatchers = new ArrayList<>();
-    private AtomicReference<ZKClusterStatusName> zkClusterStatus = null;
+    private AtomicReference<ZKClusterStatusName> zkClusterStatus =
+            new AtomicReference<>(ZKClusterStatusName.NO_QUORUM);
 
     /**
      * Zookeeper connection fields
@@ -98,7 +99,7 @@ public final class ZKClusterWatcher implements Watcher {
                         zkNodePollingInitialDelay))
         );
 
-        getAndSetZKClusterStatus(ZKClusterStatusName.NO_QUORUM);  // Set the initial zookeeper cluster status
+        zkClusterStatus.getAndSet(ZKClusterStatusName.NO_QUORUM); // Set the initial zookeeper cluster status
     }
 
 
@@ -180,13 +181,13 @@ public final class ZKClusterWatcher implements Watcher {
             if (event.getType() == Watcher.Event.EventType.None) {
                 switch (event.getState()) {
                     case SyncConnected:
-                        getAndSetZKClusterStatus(ZKClusterStatusName.QUORUM);
+                        zkClusterStatus.getAndSet(ZKClusterStatusName.QUORUM);
                         zkMonitorListener.onGetQuorum();
                         zkNodeWatchers.forEach(zkNodeWatcher -> zkNodeWatcher.updateStatus());
                         break;
 
                     case Disconnected:
-                        getAndSetZKClusterStatus(ZKClusterStatusName.NO_QUORUM);
+                        zkClusterStatus.getAndSet(ZKClusterStatusName.NO_QUORUM);
                         zkMonitorListener.onLackOfQuorum();
                         zkNodeWatchers.forEach(zkNodeWatcher -> zkNodeWatcher.updateStatus());
                         break;
@@ -279,23 +280,6 @@ public final class ZKClusterWatcher implements Watcher {
      */
     private void zkNodeStopMonitoring() {
         zkNodeWatchers.forEach(zkNodeWatcher -> zkNodeWatcher.stopMonitoring());
-    }
-
-
-    /**
-     * Update status with {@code newZKClusterStatus} value and return the previous one.
-     *
-     * @param newZKClusterStatus {@link ZKClusterStatusName} value
-     * @return the previous status
-     */
-    private synchronized ZKClusterStatusName getAndSetZKClusterStatus(final ZKClusterStatusName newZKClusterStatus) {
-
-        if (zkClusterStatus == null) {
-            zkClusterStatus = new AtomicReference<>(newZKClusterStatus);
-            return newZKClusterStatus;
-        } else {
-            return zkClusterStatus.getAndSet(newZKClusterStatus);
-        }
     }
 
 }

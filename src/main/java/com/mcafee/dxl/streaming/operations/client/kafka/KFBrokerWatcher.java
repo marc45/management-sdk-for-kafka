@@ -9,6 +9,7 @@ import com.mcafee.dxl.streaming.operations.client.common.ClusterTools;
 import com.mcafee.dxl.streaming.operations.client.configuration.PropertyNames;
 import com.mcafee.dxl.streaming.operations.client.exception.KFMonitorException;
 import com.mcafee.dxl.streaming.operations.client.kafka.entities.KFBrokerMetadata;
+import com.mcafee.dxl.streaming.operations.client.zookeeper.ZKClusterStatusName;
 import kafka.cluster.Broker;
 import scala.collection.JavaConversions;
 
@@ -34,9 +35,10 @@ public final class KFBrokerWatcher {
      */
     private static final int SOCKET_CONNECTION_TIMEOUT = 1500;
     private static final long WATCHER_AWAIT_TERMINATION_MS = 200L;
+    private static final long METADATA_REQUEST_SLEEP_TIME_MS = 2000L;
 
     /**
-     * Polling mechanism fields
+     * They are used to poll kafka broker server
      */
     private final int kfNodePollingDelay;
     private final int kfNodePollingInitialDelay;
@@ -54,6 +56,9 @@ public final class KFBrokerWatcher {
     private AtomicReference<KFBrokerStatusName> kfBrokerStatus =
             new AtomicReference<>(KFBrokerStatusName.DOWN);
 
+    /**
+     * Broker watcher metadata
+     */
     private AtomicReference<KFBrokerMetadata> kfBrokerMetadata =
             new AtomicReference<>(new KFBrokerMetadata());
 
@@ -67,6 +72,8 @@ public final class KFBrokerWatcher {
      */
     private String zkConnectionString;
     private int zkSessionTimeout;
+    private AtomicReference<ZKClusterStatusName> zkClusterStatus =
+            new AtomicReference<>(ZKClusterStatusName.NO_QUORUM);
 
 
     /**
@@ -104,6 +111,7 @@ public final class KFBrokerWatcher {
 
     /**
      * Get Kafka broker metadata
+     *
      * @return Kafka broker metadata
      */
     public KFBrokerMetadata getBrokerMetadata() {
@@ -113,12 +121,13 @@ public final class KFBrokerWatcher {
     /**
      * Get the latest Kafka broker status.
      * <p>
+     *
      * @return Kafka broker current status
      * @throws KFMonitorException if {@link KFBrokerWatcher#startMonitoring()} has been not been called
      */
     public KFBrokerStatusName getStatus() {
-        if(executor.isShutdown()) {
-            throw new KFMonitorException("Kafka broker watcher has not been started",null,this.getClass());
+        if (executor.isShutdown()) {
+            throw new KFMonitorException("Kafka broker watcher has not been started", null, this.getClass());
         }
 
         return kfBrokerStatus.get();
@@ -127,6 +136,7 @@ public final class KFBrokerWatcher {
     /**
      * Get Kafka broker address
      * <p>
+     *
      * @return Kafka broker address
      */
     public InetSocketAddress getKfBrokerAddress() {
@@ -156,6 +166,7 @@ public final class KFBrokerWatcher {
      * Calls this method more than once will not have effect.
      */
     public void stopMonitoring() {
+
         if (executorController != null) {
             executorController.cancel(true);
             executorController = null;
@@ -169,6 +180,7 @@ public final class KFBrokerWatcher {
             if (!executor.isTerminated()) {
                 executor.shutdownNow();
             }
+            initializeBrokerMetadata();
         }
     }
 
@@ -184,23 +196,31 @@ public final class KFBrokerWatcher {
 
     /**
      * Try to connect to Kafka broker server
-     * and set the new status according to the connection result
+     * and set the new status according to the connection result. Additionally, updates broker metadata if
+     * Zookeeper cluster has quorum.
      *
      * @return {@link KFBrokerStatusName} that represents the previous status
      */
     private KFBrokerStatusName getAndSetStatus() {
-        KFBrokerStatusName zkNodePreviousStatus;
+        KFBrokerStatusName kfBrokerPreviousStatus;
 
         final Socket socket = new Socket();
 
         try {
             socket.connect(kfBrokerAddress, SOCKET_CONNECTION_TIMEOUT);
             socket.close();
-            zkNodePreviousStatus = this.kfBrokerStatus.getAndSet(KFBrokerStatusName.UP);
-        } catch (Exception ex) {
-            zkNodePreviousStatus = this.kfBrokerStatus.getAndSet(KFBrokerStatusName.DOWN);
+            updateMetadataSync();
+
+            if (kfBrokerMetadata.get().getConnectionString().isEmpty()) { // true means broker is not registered
+                kfBrokerPreviousStatus = this.kfBrokerStatus.getAndSet(KFBrokerStatusName.WARNING);
+            } else {
+                kfBrokerPreviousStatus = this.kfBrokerStatus.getAndSet(KFBrokerStatusName.UP);
+            }
+        } catch (Exception ex) {  // Broker is unreachable
+            kfBrokerPreviousStatus = this.kfBrokerStatus.getAndSet(KFBrokerStatusName.DOWN);
+            initializeBrokerMetadata();
         }
-        return zkNodePreviousStatus;
+        return kfBrokerPreviousStatus;
     }
 
     /**
@@ -216,6 +236,9 @@ public final class KFBrokerWatcher {
                 case DOWN:
                     kfMonitorListener.onBrokerDown(kfBrokerAddress.getHostName());
                     break;
+                case WARNING:
+                    kfMonitorListener.onBrokerWarning(kfBrokerAddress.getHostName());
+                    break;
                 default:
             }
         }
@@ -225,7 +248,7 @@ public final class KFBrokerWatcher {
     /**
      * Update Kafka broker status in asynchronous way
      */
-    public void updateStatus() {
+    public void updateStatusAsync() {
         Runnable runnable = () -> emitEventIfBrokerStatusHasChanged();
         Thread thread = new Thread(runnable);
         thread.start();
@@ -233,6 +256,7 @@ public final class KFBrokerWatcher {
 
     /**
      * Validate constructor arguments
+     *
      * @param kfMonitorListener
      * @param kfNodeAddress
      * @param zkConnectionString
@@ -266,16 +290,18 @@ public final class KFBrokerWatcher {
         }
     }
 
+
     /**
      * It spawns a new thread and update Kafka broker metadata
      */
     public void updateMetadataAsync() {
-        final Runnable runnable  = () -> {
-            final List<Broker> kafkaBrokers = getRegisteredKafkaBrokers();
-            kfBrokerMetadata.set(getBrokerMetadataByAddress(kafkaBrokers ,kfBrokerAddress));
-        };
-        Thread thread = new Thread(runnable);
-        thread.start();
+        final Runnable runnable = () -> updateMetadataSync();
+        new Thread(runnable).start();
+    }
+
+    public void updateMetadataSync() {
+        final List<Broker> kafkaBrokers = getRegisteredKafkaBrokers();
+        kfBrokerMetadata.set(getBrokerMetadataByAddress(kafkaBrokers, kfBrokerAddress));
     }
 
     /**
@@ -285,13 +311,13 @@ public final class KFBrokerWatcher {
      * @return list of registered Kafka brokers
      */
     private List<Broker> getRegisteredKafkaBrokers() {
-        try(ClusterConnection cnx = new ClusterConnection(zkConnectionString,
+        try (ClusterConnection cnx = new ClusterConnection(zkConnectionString,
                 PropertyNames.ZK_CONNECTION_TIMEOUT_MS.getDefaultValue(),
                 String.valueOf(zkSessionTimeout))) {
 
             final ClusterTools clusterTools = new ClusterTools();
             return clusterTools.getKafkaBrokers(cnx.getConnection());
-        } catch (Exception e){
+        } catch (Exception e) {
         }
         return new ArrayList<>();
     }
@@ -299,7 +325,7 @@ public final class KFBrokerWatcher {
     /**
      * Get Kafka broker metadata for a specific address
      *
-     * @param kafkaBrokers list of registered Kafka brokers
+     * @param kafkaBrokers    list of registered Kafka brokers
      * @param kfBrokerAddress address to look for
      * @return Kafka broker metadata
      */
@@ -310,7 +336,7 @@ public final class KFBrokerWatcher {
 
         kafkaBrokers.forEach(broker -> {
             JavaConversions.mapAsJavaMap(broker.endPoints())
-                    .forEach( (protocol, endpoint) -> {
+                    .forEach((protocol, endpoint) -> {
                         if (endpoint.host().equals(kfBrokerAddress.getHostName())
                                 && endpoint.port() == kfBrokerAddress.getPort()) {
                             brokerMetadata.setBrokerId(broker.id());
@@ -324,4 +350,25 @@ public final class KFBrokerWatcher {
         return brokerMetadata;
     }
 
+
+    /**
+     * Initialize broker metadata
+     */
+    public void initializeBrokerMetadata() {
+        kfBrokerMetadata.set(new KFBrokerMetadata());
+    }
+
+
+    public void onZKQuorum() {
+        zkClusterStatus.set(ZKClusterStatusName.QUORUM);
+    }
+
+    public void onZKNotQuorum() {
+        zkClusterStatus.set(ZKClusterStatusName.NO_QUORUM);
+        initializeBrokerMetadata();
+    }
+
+    public void onZKSessionExpired() {
+        onZKNotQuorum();
+    }
 }

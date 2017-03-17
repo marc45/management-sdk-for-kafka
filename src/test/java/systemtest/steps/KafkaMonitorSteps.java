@@ -48,6 +48,8 @@ public class KafkaMonitorSteps {
 
     @AfterStory
     public void afterStory() {
+        docker.stopContainers();
+        docker.removeContainers();
     }
 
 
@@ -67,7 +69,7 @@ public class KafkaMonitorSteps {
         kfMonitor = new KafkaMonitorBuilder(kfEndpoints,zkEndpoints)
                 .withZookeeperSessionTimeout(500)
                 .withKafkaPollingInitialDelayTime(0)
-                .withKafkaPollingDelayTime(500)
+                .withKafkaPollingDelayTime(1000)
                 .build();
         kfMonitor.start();
         while(kfMonitor.getHealth() != KFClusterStatusName.OK) {

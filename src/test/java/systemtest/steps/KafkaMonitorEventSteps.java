@@ -55,6 +55,8 @@ public class KafkaMonitorEventSteps {
 
     @AfterStory
     public void afterStory() {
+        docker.stopContainers();
+        docker.removeContainers();
     }
 
     @Given("a list of Zookeeper endpoints $zkEndpoints")
@@ -73,7 +75,7 @@ public class KafkaMonitorEventSteps {
         kfMonitor = new KafkaMonitorBuilder(kfEndpoints,zkEndpoints)
                 .withZookeeperSessionTimeout(500)
                 .withKafkaPollingInitialDelayTime(0)
-                .withKafkaPollingDelayTime(500)
+                .withKafkaPollingDelayTime(1000)
                 .withKafkaMonitorListener(listener)
                 .build();
         kfMonitor.start();
@@ -142,6 +144,7 @@ public class KafkaMonitorEventSteps {
         AtomicBoolean onEventReceived = new AtomicBoolean(false);
         AtomicBoolean isBrokerUp = new AtomicBoolean(false);
         AtomicBoolean isBrokerDown = new AtomicBoolean(false);
+        AtomicBoolean isBrokerWarning = new AtomicBoolean(false);
         AtomicReference<String> nodeName = new AtomicReference<>("");
 
         @Override
@@ -156,6 +159,14 @@ public class KafkaMonitorEventSteps {
             isBrokerDown.set(true);
             nodeName.set(zkBrokerName);
             onEventReceived.set(true);
+        }
+
+        @Override
+        public void onBrokerWarning(String zkBrokerName) {
+            isBrokerWarning.set(true);
+            nodeName.set(zkBrokerName);
+            onEventReceived.set(true);
+
         }
     }
 

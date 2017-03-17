@@ -9,7 +9,7 @@ import org.jbehave.core.junit.JUnitStories;
 import org.jbehave.core.reporters.StoryReporterBuilder;
 import org.jbehave.core.steps.InjectableStepsFactory;
 import org.jbehave.core.steps.InstanceStepsFactory;
-import systemtest.steps.ManagementTopicSteps;
+import systemtest.steps.CreateTopicSteps;
 
 import java.util.Arrays;
 import java.util.List;
@@ -32,7 +32,7 @@ public class CreateTopicStories extends JUnitStories {
     // Here we specify the steps classes
     @Override
     public InjectableStepsFactory stepsFactory() {
-        return new InstanceStepsFactory(configuration(), new ManagementTopicSteps());
+        return new InstanceStepsFactory(configuration(), new CreateTopicSteps());
     }
 
 

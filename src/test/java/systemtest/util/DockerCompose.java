@@ -33,7 +33,7 @@ public class DockerCompose {
         try {
             dockerClient
                     .createContainerCmd("docker-registry-2.pcorp.fastpoc.net:5000/databus/zookeeper:3.4.8.10")
-                    .withEnv(new String[]{"SERVER_ID=1", "MAX_SERVERS=3","MIN_SESSION_TIMEOUT=1000", "MAX_SESSION_TIMEOUT=2500"})
+                    .withEnv(new String[]{"SERVER_ID=1", "MAX_SERVERS=3","MIN_SESSION_TIMEOUT=1000", "MAX_SESSION_TIMEOUT=2000"})
                     .withExposedPorts(ExposedPort.tcp(2181))
                     .withNetworkMode("host")
                     .withHostName("zookeeper-1")
@@ -45,7 +45,7 @@ public class DockerCompose {
         try {
             dockerClient
                     .createContainerCmd("docker-registry-2.pcorp.fastpoc.net:5000/databus/zookeeper:3.4.8.10")
-                    .withEnv(new String[]{"SERVER_ID=2", "MAX_SERVERS=3","MIN_SESSION_TIMEOUT=1000", "MAX_SESSION_TIMEOUT=2500"})
+                    .withEnv(new String[]{"SERVER_ID=2", "MAX_SERVERS=3","MIN_SESSION_TIMEOUT=1000", "MAX_SESSION_TIMEOUT=2000"})
                     .withExposedPorts(ExposedPort.tcp(2181))
                     .withNetworkMode("host")
                     .withHostName("zookeeper-2")
@@ -58,7 +58,7 @@ public class DockerCompose {
         try {
             dockerClient
                     .createContainerCmd("docker-registry-2.pcorp.fastpoc.net:5000/databus/zookeeper:3.4.8.10")
-                    .withEnv(new String[]{"SERVER_ID=3", "MAX_SERVERS=3","MIN_SESSION_TIMEOUT=1000", "MAX_SESSION_TIMEOUT=2500"})
+                    .withEnv(new String[]{"SERVER_ID=3", "MAX_SERVERS=3","MIN_SESSION_TIMEOUT=1000", "MAX_SESSION_TIMEOUT=2000"})
                     .withExposedPorts(ExposedPort.tcp(2181))
                     .withNetworkMode("host")
                     .withHostName("zookeeper-3")
@@ -140,12 +140,12 @@ public class DockerCompose {
     public void removeContainers() {
         System.out.println("Removing containers...");
         try {
-            dockerClient.removeContainerCmd("kafka-1");
-            dockerClient.removeContainerCmd("kafka-2");
-            dockerClient.removeContainerCmd("kafka-3");
-            dockerClient.removeContainerCmd("zookeeper-1");
-            dockerClient.removeContainerCmd("zookeeper-2");
-            dockerClient.removeContainerCmd("zookeeper-3");
+            dockerClient.removeContainerCmd("kafka-1").exec();
+            dockerClient.removeContainerCmd("kafka-2").exec();
+            dockerClient.removeContainerCmd("kafka-3").exec();
+            dockerClient.removeContainerCmd("zookeeper-1").exec();
+            dockerClient.removeContainerCmd("zookeeper-2").exec();
+            dockerClient.removeContainerCmd("zookeeper-3").exec();
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -168,7 +168,7 @@ public class DockerCompose {
 
             } catch(NotModifiedException e) {
             }
-            Thread.sleep(2000);
+            Thread.sleep(4000);
 
             try {
                 dockerClient.startContainerCmd("kafka-1").exec();
