@@ -1,4 +1,4 @@
-# dxlstream-management-sdk
+# Management SDK for Kafka
 ## Build
 ## Documentation
 ## Features
