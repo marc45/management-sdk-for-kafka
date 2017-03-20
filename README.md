@@ -1,7 +1,7 @@
 # Management SDK for Kafka
 
 ## Rationale
-
+It allows to 
 
 ## Main features
 * Kafka cluster monitoring
@@ -18,13 +18,16 @@
 0.9.0
 
 ## Kafka version supported
-Kafka: 0.9.0.1
+0.9.0.1
 
 ## Zookeeper version supported
-Zookeeper: 3.4.8
+3.4.8
 
 ## JVM version supported
 Java 1.8.0
+
+## License
+Apache License 2.0
 
 ## Ramping up
 [wiki](https://github-lvs.corpzone.internalzone.com/detect/dxlstream-management-sdk/wiki)
