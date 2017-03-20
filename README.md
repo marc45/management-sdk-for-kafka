@@ -2,15 +2,8 @@
 
 ## Rationale
 
-## Build
-```
-mvn install
-```
 
-## Documentation
-[javadoc](http://databus-doc.fastdxl.net/4.0/mgmt-sdk-javadoc/index.html)
-
-## Features
+## Main features
 * Kafka cluster monitoring
 * Zookeeper cluster monitoring
 * Create topic
@@ -18,11 +11,25 @@ mvn install
 * Get topic configuration
 * Override topic configuration
 
-## Latest build
+## Documentation
+[javadoc](http://databus-doc.fastdxl.net/4.0/mgmt-sdk-javadoc/index.html)
 
-## Kafka and Zookeeper versions supported
+## Latest build
+0.9.0
+
+## Kafka version supported
+Kafka: 0.9.0.1
+
+## Zookeeper version supported
+Zookeeper: 3.4.8
 
 ## JVM version supported
+Java 1.8.0
 
 ## Ramping up
 [wiki](https://github-lvs.corpzone.internalzone.com/detect/dxlstream-management-sdk/wiki)
+
+## Build
+```
+mvn install
+```
