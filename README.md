@@ -1,6 +1,6 @@
 # Management SDK for Kafka
 
-## Rationale
+## Overview
 It allows to 
 
 ## Main features
@@ -26,11 +26,12 @@ It allows to
 ## JVM version supported
 Java 1.8.0
 
-## License
-Apache License 2.0
-
 ## Ramping up
 [wiki](https://github-lvs.corpzone.internalzone.com/detect/dxlstream-management-sdk/wiki)
+
+## Bugs and feedback
+
+For bugs, questions and discussions please use the [Github issues](https://github-lvs.corpzone.internalzone.com/detect/dxlstream-management-sdk/issues)
 
 ## Build
 ```
