@@ -9,5 +9,6 @@
 * List topics
 * Get topic configuration
 * Override topic configuration
-## Ramp up coding
+
+## Ramping up
 [wiki](https://github-lvs.corpzone.internalzone.com/detect/dxlstream-management-sdk/wiki)
