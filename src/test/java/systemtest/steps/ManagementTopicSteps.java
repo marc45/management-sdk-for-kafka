@@ -1,24 +1,29 @@
-package systemtest.steps;
-
 /**
- * Created by ana on 3/10/17.
+ * Copyright (c) 2017 McAfee Inc. - All Rights Reserved
  */
 
-import com.mcafee.dxl.streaming.operations.client.*;
+package systemtest.steps;
+
+import com.mcafee.dxl.streaming.operations.client.KafkaMonitor;
+import com.mcafee.dxl.streaming.operations.client.KafkaMonitorBuilder;
+import com.mcafee.dxl.streaming.operations.client.TopicService;
+import com.mcafee.dxl.streaming.operations.client.TopicServiceBuilder;
 import com.mcafee.dxl.streaming.operations.client.kafka.KFClusterStatusName;
-import com.mcafee.dxl.streaming.operations.client.zookeeper.ZKClusterHealthName;
-import junit.framework.Assert;
+import org.hamcrest.Matchers;
 import org.jbehave.core.annotations.AfterScenario;
 import org.jbehave.core.annotations.AfterStory;
 import org.jbehave.core.annotations.BeforeScenario;
 import org.jbehave.core.annotations.BeforeStory;
 import org.jbehave.core.annotations.Given;
 import org.jbehave.core.annotations.Named;
+import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 import systemtest.util.DockerCompose;
 
 import java.time.Instant;
 import java.util.Properties;
+
+import static org.junit.Assert.*;
 
 public class ManagementTopicSteps {
     private final DockerCompose docker;
@@ -70,7 +75,7 @@ public class ManagementTopicSteps {
     @Given("I start Kafka monitoring")
     public void whenIStartKafkaMonitoring() throws InterruptedException {
         KafkaMonitor kafkaMonitor = new KafkaMonitorBuilder(kfEndpoints, zkEndpoints)
-                .withZookeeperSessionTimeout(500)
+                .withZookeeperSessionTimeout(1000)
                 .withKafkaPollingInitialDelayTime(0)
                 .withKafkaPollingDelayTime(500)
                 .build();
@@ -78,7 +83,10 @@ public class ManagementTopicSteps {
         while (kafkaMonitor.getCluster().getKfClusterStatus() != KFClusterStatusName.OK) {
             Thread.sleep(500);
         }
-            }
+        System.out.println("wait extra 20s until kafka are registered in ZK");
+        //TODO this must be removed when getKfClusterStatus is fixed.
+        Thread.sleep(20000);
+    }
 
     @When("I set the partitions as $partitionNumber")
     public void setPartitionNumber(@Named("$partitionNumber") int partitionNumber) {
@@ -114,7 +122,22 @@ public class ManagementTopicSteps {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            Assert.fail("ERROR: " + e.getMessage());
+            fail("ERROR: " + e.getMessage());
+        }
+    }
+
+    @Then("I get all topics and the topic with isolated name $topicName is present")
+    public void getAllTopicsContainsATopic(String topicName) throws InterruptedException {
+        String isolatedTopicName = getIsolatedTopicName(topicName);
+        try (TopicService topicService = new TopicServiceBuilder(zkEndpoints)
+                .withZKConnectionTimeout(zKConnectionTimeout)
+                .withZKSessionTimeout(zKSessionTimeout)
+                .build()) {
+            assertThat("The just created topic: " + isolatedTopicName + " is expected to be in all topic list",
+                    topicService.getAllTopics().contains(isolatedTopicName), Matchers.is(true));
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail("ERROR: " + e.getMessage());
         }
     }
 

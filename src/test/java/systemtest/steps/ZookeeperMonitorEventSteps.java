@@ -1,3 +1,7 @@
+/**
+ * Copyright (c) 2017 McAfee Inc. - All Rights Reserved
+ */
+
 package systemtest.steps;
 
 import com.mcafee.dxl.streaming.operations.client.ZookeeperMonitor;

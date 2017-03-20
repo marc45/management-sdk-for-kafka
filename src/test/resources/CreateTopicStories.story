@@ -1,3 +1,6 @@
+Meta:
+@story B_304300 B_304306
+
 Narrative: Create a Topic
 
 Scenario: Check that when create a topic, the Management Service SDK returns an error when I use invalid topic name
@@ -9,4 +12,5 @@ And I set the replication factor as 3
 And I set the property max.message.bytes with the value 3000000
 And I set the property flush.messages with the value 1
 When I create a topic with isolated name TestTopic
+Then I get all topics and the topic with isolated name TestTopic is present
 

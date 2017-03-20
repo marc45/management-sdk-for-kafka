@@ -25,6 +25,18 @@
             <version>0.7</version>
         </dependency>
         <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+            <version>1.7.21</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jbehave.site</groupId>
+            <artifactId>jbehave-site-resources</artifactId>
+            <version>3.3</version>
+            <type>zip</type>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>4.12</version>
@@ -46,6 +58,14 @@
             <groupId>org.jbehave</groupId>
             <artifactId>jbehave-core</artifactId>
             <version>3.8</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jbehave</groupId>
+            <artifactId>jbehave-core</artifactId>
+            <version>3.8</version>
+            <classifier>resources</classifier>
+            <type>zip</type>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -88,7 +108,24 @@
                     <target>1.8</target>
                 </configuration>
             </plugin>
-
+            <plugin>
+                <groupId>com.coderplus.maven.plugins</groupId>
+                <artifactId>copy-rename-maven-plugin</artifactId>
+                <version>1.0.1</version>
+                <executions>
+                    <execution>
+                        <id>rename-file</id>
+                        <phase>post-integration-test</phase>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                        <configuration>
+                            <sourceFile>src/test/resources/view/jbehave-logo.png</sourceFile>
+                            <destinationFile>${basedir}/target/jbehave/view/images/jbehave-logo.png</destinationFile>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-checkstyle-plugin</artifactId>
@@ -104,7 +141,8 @@
                     <encoding>UTF-8</encoding>
                     <failOnViolation>false</failOnViolation>
                     <configLocation>src/static-analysis/checkstyle/sun_checks.xml</configLocation>
-                    <suppressionsLocation>src/static-analysis/checkstyle/checkstyle-suppressions.xml</suppressionsLocation>
+                    <suppressionsLocation>src/static-analysis/checkstyle/checkstyle-suppressions.xml
+                    </suppressionsLocation>
                     <suppressionsFileExpression>checkstyle.suppressions.file</suppressionsFileExpression>
                 </configuration>
                 <executions>
@@ -147,45 +185,49 @@
                 </configuration>
             </plugin>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-failsafe-plugin</artifactId>
-                <version>2.16</version>
-                <executions>
-                    <execution>
-                        <id>integration-test</id>
-                        <goals>
-                            <goal>integration-test</goal>
-                            <goal>verify</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <includes>
-                        <include>**/*Stories.java</include>
-                    </includes>
-                </configuration>
-            </plugin>
-            <plugin>
                 <groupId>org.jbehave</groupId>
                 <artifactId>jbehave-maven-plugin</artifactId>
                 <version>3.8</version>
                 <executions>
                     <execution>
+                        <id>unpack-view-resources</id>
+                        <phase>pre-integration-test</phase>
+                        <goals>
+                            <goal>unpack-view-resources</goal>
+                        </goals>
+                        <configuration>
+                            <scope>test</scope>
+                        </configuration>
+                    </execution>
+                    <execution>
                         <id>run-stories-as-embeddables</id>
                         <phase>integration-test</phase>
                         <configuration>
-                            <testSourceDirectory>${basedir}/src/test/java</testSourceDirectory>
+                            <scope>test</scope>
                             <includes>
                                 <include>**/*Stories.java</include>
                             </includes>
-                            <ignoreFailureInStories>false</ignoreFailureInStories>
-                            <ignoreFailureInView>false</ignoreFailureInView>
+                            <ignoreFailureInStories>true</ignoreFailureInStories>
+                            <ignoreFailureInView>true</ignoreFailureInView>
+                            <generateViewAfterStories>true</generateViewAfterStories>
+                            <skip>${skip.component.test}</skip>
+                            <metaFilters>
+                                <metaFilter>${meta.filter}</metaFilter>
+                            </metaFilters>
                         </configuration>
                         <goals>
                             <goal>run-stories-as-embeddables</goal>
                         </goals>
                     </execution>
                 </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>log4j</groupId>
+                        <artifactId>log4j</artifactId>
+                        <version>1.2.17</version>
+                        <scope>compile</scope>
+                    </dependency>
+                </dependencies>
             </plugin>
         </plugins>
         <pluginManagement>
@@ -207,7 +249,6 @@
         </pluginManagement>
 
     </build>
-
 
 
 </project>

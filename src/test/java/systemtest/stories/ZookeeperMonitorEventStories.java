@@ -1,18 +1,22 @@
+/**
+ * Copyright (c) 2017 McAfee Inc. - All Rights Reserved
+ */
+
 package systemtest.stories;
 
-import systemtest.steps.ZookeeperMonitorEventSteps;
 import org.jbehave.core.configuration.Configuration;
 import org.jbehave.core.junit.JUnitStories;
-import org.jbehave.core.reporters.Format;
 import org.jbehave.core.reporters.StoryReporterBuilder;
 import org.jbehave.core.steps.InjectableStepsFactory;
 import org.jbehave.core.steps.InstanceStepsFactory;
+import systemtest.steps.ZookeeperMonitorEventSteps;
 
 import java.util.Arrays;
 import java.util.List;
 
-import static org.jbehave.core.reporters.Format.CONSOLE;
-import static org.jbehave.core.reporters.Format.TXT;
+import static org.jbehave.core.reporters.Format.ANSI_CONSOLE;
+import static org.jbehave.core.reporters.Format.HTML;
+import static org.jbehave.core.reporters.Format.STATS;
 
 public class ZookeeperMonitorEventStories  extends JUnitStories {
 
@@ -22,7 +26,7 @@ public class ZookeeperMonitorEventStories  extends JUnitStories {
                 .useStoryReporterBuilder(
                         new StoryReporterBuilder()
                                 .withDefaultFormats()
-                                .withFormats(Format.HTML,CONSOLE, TXT));
+                                .withFormats(ANSI_CONSOLE, STATS, HTML));
     }
 
     // Here we specify the steps classes
@@ -34,6 +38,6 @@ public class ZookeeperMonitorEventStories  extends JUnitStories {
 
     @Override
     protected List<String> storyPaths() {
-        return Arrays.asList("./ZookeeperMonitorEventStories.story");
+        return Arrays.asList("ZookeeperMonitorEventStories.story");
     }
 }
