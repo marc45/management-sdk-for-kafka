@@ -1,5 +1,9 @@
 # Management SDK for Kafka
 ## Build
+```
+mvn install
+```
+
 ## Documentation
 [javadoc](http://databus-doc.fastdxl.net/4.0/mgmt-sdk-javadoc/index.html)
 ## Features
