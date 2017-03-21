@@ -4,7 +4,7 @@
 ## Overview
 It is set of APIs packaged as JAR file, capable of being integrated by other Java solutions to operate and monitoring a Kafka cluster programatically.  
 
-## Main features
+### Main features
 * Kafka cluster monitoring
 * Zookeeper cluster monitoring
 * Create topic
@@ -27,7 +27,7 @@ It is set of APIs packaged as JAR file, capable of being integrated by other Jav
 ## JVM version supported
 Java 1.8.0
 
-## Ramping up
+## Usage
 [wiki](https://github-lvs.corpzone.internalzone.com/detect/dxlstream-management-sdk/wiki)
 
 ## Bugs and feedback
