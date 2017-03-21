@@ -2,7 +2,7 @@
 # Management SDK for Kafka
 
 ## Overview
-It allows to operate a Kafka cluster
+It is set of APIs packaged as JAR file, capable of being integrated by other Java solutions to operate and monitoring a Kafka cluster programatically.  
 
 ## Main features
 * Kafka cluster monitoring
