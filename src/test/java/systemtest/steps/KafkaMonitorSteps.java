@@ -65,7 +65,6 @@ public class KafkaMonitorSteps {
 
     @When("I start Kafka monitoring")
     public void whenIStartKafkaMonitoring() throws InterruptedException {
-
         kfMonitor = new KafkaMonitorBuilder(kfEndpoints,zkEndpoints)
                 .withZookeeperSessionTimeout(500)
                 .withKafkaPollingInitialDelayTime(0)

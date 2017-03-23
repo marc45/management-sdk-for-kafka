@@ -5,10 +5,12 @@
 package systemtest.stories;
 
 import org.jbehave.core.configuration.Configuration;
+import org.jbehave.core.junit.AnnotatedEmbedderRunner;
 import org.jbehave.core.junit.JUnitStories;
 import org.jbehave.core.reporters.StoryReporterBuilder;
 import org.jbehave.core.steps.InjectableStepsFactory;
 import org.jbehave.core.steps.InstanceStepsFactory;
+import org.junit.runner.RunWith;
 import systemtest.steps.KafkaMonitorSteps;
 
 import java.util.Arrays;
@@ -18,6 +20,7 @@ import static org.jbehave.core.reporters.Format.ANSI_CONSOLE;
 import static org.jbehave.core.reporters.Format.HTML;
 import static org.jbehave.core.reporters.Format.STATS;
 
+@RunWith(AnnotatedEmbedderRunner.class)
 public class KafkaMonitorStories extends JUnitStories {
 
     @Override
