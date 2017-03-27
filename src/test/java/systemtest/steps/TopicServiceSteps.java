@@ -206,7 +206,7 @@ public class TopicServiceSteps {
         }
     }
 
-    @Then("the exception contains the message  $message")
+    @Then("the exception contains the message $message")
     public void checkExceptionMessage(String message) throws InterruptedException {
         assertThat("The message expected when calling topicService.getAllTopics " +
                 "is not the expected", exceptionMessage, org.hamcrest.Matchers.containsString(message));
