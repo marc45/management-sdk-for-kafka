@@ -103,7 +103,7 @@ public class TopicServiceSteps {
     }
 
     @When("I stop $container container")
-    public void whenIStopAKafkaBroker(String container) throws InterruptedException {
+    public void whenIStopAContainer(String container) throws InterruptedException {
         docker.stopNode(container);
     }
 
@@ -193,7 +193,7 @@ public class TopicServiceSteps {
     }
 
     @Then("I get all topics a exception is thrown")
-    public void getAllTopicsAExceptionIsThrown(String message) throws InterruptedException {
+    public void getAllTopicsAExceptionIsThrown() throws InterruptedException {
         try (TopicService topicService = new TopicServiceBuilder(zkEndpoints)
                 .withZKConnectionTimeout(zKConnectionTimeout)
                 .withZKSessionTimeout(zKSessionTimeout)

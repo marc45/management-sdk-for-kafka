@@ -101,8 +101,7 @@ And I start Kafka monitoring
 When I create a topic with isolated name RTopic
 And I create a topic a exception is thrown using isolated name RTopic
 Then the exception contains the message already exists
-
-Scenario: Check that when create 3 topics, the Management Service SDK returns the 3 topics when i get all topics
+Scenario: Check that when create 3 topics, the Management Service SDK returns the 3 topics when I get all topics
 Meta:
 @story B_304306
 Given a list of Zookeeper endpoints zookeeper-1:2181,zookeeper-2:2181,zookeeper-3:2181
@@ -148,7 +147,7 @@ And I stop kafka-1 container
 And I stop zookeeper-1 container
 Then I get all topics and the topic with isolated name TestTopic is present
 
-Scenario: Check that when get all topics and all akfkas an ZK are down the Management Service SDK  responds a human readable error
+Scenario: Check that when get all topics and all kafkas an ZK are down the Management Service SDK  responds a human readable error
 Meta:
 @story B_304306
 Given a list of Zookeeper endpoints zookeeper-1:2181,zookeeper-2:2181,zookeeper-3:2181
