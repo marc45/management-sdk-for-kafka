@@ -74,6 +74,12 @@
             <version>3.0.6</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest-library</artifactId>
+            <version>1.3</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -170,7 +176,7 @@
                 <executions>
                     <execution>
                         <goals>
-                            <goal>clean</goal>
+                            <goal>instrument</goal>
                         </goals>
                     </execution>
                 </executions>
@@ -200,19 +206,21 @@
                         </configuration>
                     </execution>
                     <execution>
-                        <id>run-stories-as-embeddables</id>
-                        <phase>integration-test</phase>
+                        <id>run-stories-as-embedders</id>
+                        <phase>test</phase>
                         <configuration>
                             <scope>test</scope>
                             <includes>
                                 <include>**/*Stories.java</include>
                             </includes>
-                            <ignoreFailureInStories>true</ignoreFailureInStories>
+                            <ignoreFailureInStories>false</ignoreFailureInStories>
                             <ignoreFailureInView>true</ignoreFailureInView>
                             <generateViewAfterStories>true</generateViewAfterStories>
                             <skip>${skip.component.test}</skip>
                             <metaFilters>
                                 <metaFilter>${meta.filter}</metaFilter>
+                                <metaFilter>-manual</metaFilter>
+                                <metaFilter>-ignored</metaFilter>
                             </metaFilters>
                         </configuration>
                         <goals>

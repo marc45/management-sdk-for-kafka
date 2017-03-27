@@ -193,22 +193,22 @@ public class DockerCompose {
         System.out.println("Stoping containers...");
         try {
             try {
-                dockerClient.stopContainerCmd("kafka-3").exec();
+                dockerClient.killContainerCmd("kafka-3").exec();
             } catch (NotModifiedException e){}
             try {
-                dockerClient.stopContainerCmd("kafka-2").exec();
+                dockerClient.killContainerCmd("kafka-2").exec();
             } catch (NotModifiedException e){}
             try {
-                dockerClient.stopContainerCmd("kafka-1").exec();
+                dockerClient.killContainerCmd("kafka-1").exec();
             } catch (NotModifiedException e){}
             try {
-                dockerClient.stopContainerCmd("zookeeper-3").exec();
+                dockerClient.killContainerCmd("zookeeper-3").exec();
             } catch (NotModifiedException e){}
             try {
-                dockerClient.stopContainerCmd("zookeeper-2").exec();
+                dockerClient.killContainerCmd("zookeeper-2").exec();
             } catch (NotModifiedException e){}
             try {
-                dockerClient.stopContainerCmd("zookeeper-1").exec();
+                dockerClient.killContainerCmd("zookeeper-1").exec();
             } catch (NotModifiedException e){}
 
         } catch (Exception ex) {
@@ -218,14 +218,8 @@ public class DockerCompose {
     }
 
     public void stopNode(String nodeName) {
-
-
         try {
-            dockerClient.stopContainerCmd(nodeName).exec();
-            dockerClient.waitContainerCmd(nodeName)
-                    .exec(new WaitContainerResultCallback())
-                    .awaitStatusCode();
-
+            dockerClient.killContainerCmd(nodeName).exec();
         } catch (NotModifiedException e) {
             System.out.println("There is a problem stopping the container " + nodeName + " ERROR:" + e.getMessage());
         }
