@@ -8,76 +8,156 @@
     <artifactId>msdk4kafka</artifactId>
     <version>0.9.0</version>
 
+    <name>Management SDK for Kafka</name>
+    <description>It is set of APIs to operate and monitoring a Kafka cluster programmatically.</description>
+    <url>http://www.example.com/example-application</url>
+
+    <licenses>
+        <license>
+            <name>The Apache License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+    </licenses>
+
+
+    <developers>
+        <developer>
+            <name>Luciano Afranllie</name>
+            <email>luciano_afranllie_ruiz@mcafee.com</email>
+            <organization>McAfee</organization>
+            <organizationUrl>http://www.mcafee.com</organizationUrl>
+        </developer>
+        <developer>
+            <name>Martin Cremona</name>
+            <email>guido_cremona@mcafee.com</email>
+            <organization>McAfee</organization>
+            <organizationUrl>http://www.mcafee.com</organizationUrl>
+        </developer>
+        <developer>
+            <name>Fernando Mancuso</name>
+            <email>fernando_e_mancuso@mcafee.com</email>
+            <organization>McAfee</organization>
+            <organizationUrl>http://www.mcafee.com</organizationUrl>
+        </developer>
+        <developer>
+            <name>Rodrigo Martinez</name>
+            <email>rodrigo_martinez@mcafee.com</email>
+            <organization>McAfee</organization>
+            <organizationUrl>http://www.mcafee.com</organizationUrl>
+        </developer>
+        <developer>
+            <name>Javier Navarro</name>
+            <email>javier_navarro@mcafee.com</email>
+            <organization>McAfee</organization>
+            <organizationUrl>http://www.mcafee.com</organizationUrl>
+        </developer>
+        <developer>
+            <name>Ana Torres</name>
+            <email>ana_torres@macfee.com</email>
+            <organization>McAfee</organization>
+            <organizationUrl>http://www.mcafee.com</organizationUrl>
+        </developer>
+        <developer>
+            <name>Hugo Villalba</name>
+            <email>hugo_villalba@mcafee.com</email>
+            <organization>McAfee</organization>
+            <organizationUrl>http://www.mcafee.com</organizationUrl>
+        </developer>
+    </developers>
+
+    <scm>
+        <connection>scm:git:git://github.com/mcafee/management-sdk-for-kafka.git</connection>
+        <developerConnection>scm:git:ssh://github.com:mcafee/management-sdk-for-kafka.git</developerConnection>
+        <url>https://github.com/mcafee/management-sdk-for-kafka</url>
+    </scm>
+
+
+    <properties>
+
+        <jdk.source>1.8</jdk.source>
+        <jdk.target>1.8</jdk.target>
+
+        <!-- Kafka and Zookeeper dependencies -->
+        <kafka.version>0.9.0.1</kafka.version>
+        <commons-lang3.version>3.0</commons-lang3.version>
+        <zkclient.version>0.7</zkclient.version>
+
+        <!-- Test dependencies -->
+        <jbehave-site-resources.version>3.3</jbehave-site-resources.version>
+        <junit.version>4.12</junit.version>
+        <mockito-all.version>1.10.19</mockito-all.version>
+        <hamcrest-library.version>1.3</hamcrest-library.version>
+        <jbehave-core.version>3.8</jbehave-core.version>
+        <docker-java.version>3.0.6</docker-java.version>
+        <slf4j-log4j12.version>1.7.21</slf4j-log4j12.version>
+
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.apache.kafka</groupId>
             <artifactId>kafka_2.11</artifactId>
-            <version>0.9.0.1</version>
+            <version>${kafka.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
-            <version>3.0</version>
+            <version>${commons-lang3.version}</version>
         </dependency>
         <dependency>
             <groupId>com.101tec</groupId>
             <artifactId>zkclient</artifactId>
-            <version>0.7</version>
+            <version>${zkclient.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest-library</artifactId>
+            <version>${hamcrest-library.version}</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-log4j12</artifactId>
-            <version>1.7.21</version>
+            <version>${slf4j-log4j12.version}</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.jbehave.site</groupId>
             <artifactId>jbehave-site-resources</artifactId>
-            <version>3.3</version>
+            <version>${jbehave-site-resources.version}</version>
+            <type>zip</type>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jbehave</groupId>
+            <artifactId>jbehave-core</artifactId>
+            <version>${jbehave-core.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jbehave</groupId>
+            <artifactId>jbehave-core</artifactId>
+            <version>${jbehave-core.version}</version>
+            <classifier>resources</classifier>
             <type>zip</type>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.12</version>
+            <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-all</artifactId>
-            <version>1.10.19</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.hamcrest</groupId>
-            <artifactId>hamcrest-library</artifactId>
-            <version>1.3</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.jbehave</groupId>
-            <artifactId>jbehave-core</artifactId>
-            <version>3.8</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.jbehave</groupId>
-            <artifactId>jbehave-core</artifactId>
-            <version>3.8</version>
-            <classifier>resources</classifier>
-            <type>zip</type>
+            <version>${mockito-all.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.github.docker-java</groupId>
             <artifactId>docker-java</artifactId>
-            <version>3.0.6</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.hamcrest</groupId>
-            <artifactId>hamcrest-library</artifactId>
-            <version>1.3</version>
+            <version>${docker-java.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -110,8 +190,8 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
+                    <source>${jdk.source}</source>
+                    <target>${jdk.target}</target>
                 </configuration>
             </plugin>
             <plugin>
