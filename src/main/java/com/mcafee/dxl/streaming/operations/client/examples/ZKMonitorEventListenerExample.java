@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017 McAfee Inc. - All Rights Reserved
+ * Copyright (c) 2017 McAfee LLC - All Rights Reserved
  */
 
 
@@ -79,7 +79,7 @@ import java.util.concurrent.TimeUnit;
 
     // This class listen to Zookeeper Monitor Events
     // Each time Zookeeper quorum changes or a Zookeeper broker goes down/up, the corresponding method handler is called.
-    private class EventPrinterCallback implements ZKMonitorCallback {
+    private static class EventPrinterCallback implements ZKMonitorCallback {
 
         public void onNodeUp(final String zkNodeName) {
             System.out.println(LocalDateTime.now() + " [EVENT] ZK Node is started:" + zkNodeName);
@@ -161,7 +161,7 @@ public final class ZKMonitorEventListenerExample {
 
     // This class listen to Zookeeper Monitor Events
     // Each time Zookeeper quorum changes or a Zookeeper broker goes down/up, the corresponding method handler is called.
-    private class EventPrinterCallback implements ZKMonitorCallback {
+    private static class EventPrinterCallback implements ZKMonitorCallback {
 
         @Override
         public void onNodeUp(final String zkNodeName) {

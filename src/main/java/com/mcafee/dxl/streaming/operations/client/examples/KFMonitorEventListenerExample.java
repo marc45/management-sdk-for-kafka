@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017 McAfee Inc. - All Rights Reserved
+ * Copyright (c) 2017 McAfee LLC - All Rights Reserved
  */
 
 
@@ -78,7 +78,7 @@ public final class KFMonitorEventListenerExample {
         new KFMonitorEventListenerExample().startExample();
     }
 
-    private class EventPrinterCallback implements KFMonitorCallback {
+    private static class EventPrinterCallback implements KFMonitorCallback {
 
         public void onBrokerUp(final String zkBrokerName) {
             System.out.println("[EVENT] Kafka broker UP: " + zkBrokerName);
@@ -156,7 +156,7 @@ public final class KFMonitorEventListenerExample {
         new KFMonitorEventListenerExample().startExample();
     }
 
-    private class EventPrinterCallback implements KFMonitorCallback {
+    private static class EventPrinterCallback implements KFMonitorCallback {
 
         @Override
         public void onBrokerUp(final String zkBrokerName) {

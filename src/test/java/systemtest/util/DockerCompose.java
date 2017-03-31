@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017 McAfee Inc. - All Rights Reserved
+ * Copyright (c) 2017 McAfee LLC - All Rights Reserved
  */
 
 package systemtest.util;
@@ -13,7 +13,6 @@ import com.github.dockerjava.api.model.Volume;
 import com.github.dockerjava.core.DefaultDockerClientConfig;
 import com.github.dockerjava.core.DockerClientBuilder;
 import com.github.dockerjava.core.DockerClientConfig;
-import com.github.dockerjava.core.command.WaitContainerResultCallback;
 
 public class DockerCompose {
 

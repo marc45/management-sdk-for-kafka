@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017 McAfee Inc. - All Rights Reserved
+ * Copyright (c) 2017 McAfee LLC - All Rights Reserved
  */
 
 package com.mcafee.dxl.streaming.operations.client;
@@ -179,8 +179,6 @@ public class TopicService implements AutoCloseable {
      * @throws com.mcafee.dxl.streaming.operations.client.exception.ConnectionException when Zookeeper connection failed
      */
     private ZkUtils getConnection() {
-
-        final ClusterConnection connection;
 
         if (this.connection == null) {
 

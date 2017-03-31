@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017 McAfee Inc. - All Rights Reserved
+ * Copyright (c) 2017 McAfee LLC - All Rights Reserved
  */
 
 package com.mcafee.dxl.streaming.operations.client.examples;
@@ -99,7 +99,5 @@ public class KFMonitorBrokerInfoExample {
 
     public static void main(final String[] args) {
         new KFMonitorBrokerInfoExample().startExample();
-        return;
-
     }
 }

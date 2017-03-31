@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017 McAfee Inc. - All Rights Reserved
+ * Copyright (c) 2017 McAfee LLC - All Rights Reserved
  */
 
 package com.mcafee.dxl.streaming.operations.client.kafka;
@@ -35,7 +35,6 @@ public final class KFBrokerWatcher {
      */
     private static final int SOCKET_CONNECTION_TIMEOUT = 1500;
     private static final long WATCHER_AWAIT_TERMINATION_MS = 200L;
-    private static final long METADATA_REQUEST_SLEEP_TIME_MS = 2000L;
 
     /**
      * They are used to poll kafka broker server
