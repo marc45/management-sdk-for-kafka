@@ -13,7 +13,7 @@ It is set of APIs packaged as JAR file, capable of being integrated by other Jav
 * Override topic configuration
 
 ## Documentation
-[javadoc](http://databus-doc.fastdxl.net/4.0/mgmt-sdk-javadoc/index.html)
+[javadoc](http://databus-doc.fastdxl.net/3.2/mgmt-sdk-javadoc/index.html)
 
 ## Latest build
 0.9.0
