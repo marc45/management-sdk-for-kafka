@@ -1,0 +1,342 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.mcafee.dxl.streaming.operations.client</groupId>
+    <artifactId>msdk4kafka</artifactId>
+    <version>0.9.0</version>
+
+    <name>Management SDK for Kafka</name>
+    <description>It is set of APIs to operate and monitoring a Kafka cluster programmatically.</description>
+    <url>http://www.example.com/example-application</url>
+
+    <licenses>
+        <license>
+            <name>The Apache License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+    </licenses>
+
+
+    <developers>
+        <developer>
+            <name>Luciano Afranllie</name>
+            <email>luciano_afranllie_ruiz@mcafee.com</email>
+            <organization>McAfee</organization>
+            <organizationUrl>http://www.mcafee.com</organizationUrl>
+        </developer>
+        <developer>
+            <name>Martin Cremona</name>
+            <email>guido_cremona@mcafee.com</email>
+            <organization>McAfee</organization>
+            <organizationUrl>http://www.mcafee.com</organizationUrl>
+        </developer>
+        <developer>
+            <name>Fernando Mancuso</name>
+            <email>fernando_e_mancuso@mcafee.com</email>
+            <organization>McAfee</organization>
+            <organizationUrl>http://www.mcafee.com</organizationUrl>
+        </developer>
+        <developer>
+            <name>Rodrigo Martinez</name>
+            <email>rodrigo_martinez@mcafee.com</email>
+            <organization>McAfee</organization>
+            <organizationUrl>http://www.mcafee.com</organizationUrl>
+        </developer>
+        <developer>
+            <name>Javier Navarro</name>
+            <email>javier_navarro@mcafee.com</email>
+            <organization>McAfee</organization>
+            <organizationUrl>http://www.mcafee.com</organizationUrl>
+        </developer>
+        <developer>
+            <name>Ana Torres</name>
+            <email>ana_torres@macfee.com</email>
+            <organization>McAfee</organization>
+            <organizationUrl>http://www.mcafee.com</organizationUrl>
+        </developer>
+        <developer>
+            <name>Hugo Villalba</name>
+            <email>hugo_villalba@mcafee.com</email>
+            <organization>McAfee</organization>
+            <organizationUrl>http://www.mcafee.com</organizationUrl>
+        </developer>
+    </developers>
+
+    <scm>
+        <connection>scm:git:git://github.com/mcafee/management-sdk-for-kafka.git</connection>
+        <developerConnection>scm:git:ssh://github.com:mcafee/management-sdk-for-kafka.git</developerConnection>
+        <url>https://github.com/mcafee/management-sdk-for-kafka</url>
+    </scm>
+
+
+    <properties>
+
+        <jdk.source>1.8</jdk.source>
+        <jdk.target>1.8</jdk.target>
+
+        <!-- Kafka and Zookeeper dependencies -->
+        <kafka.version>0.9.0.1</kafka.version>
+        <commons-lang3.version>3.0</commons-lang3.version>
+        <zkclient.version>0.7</zkclient.version>
+
+        <!-- Test dependencies -->
+        <jbehave-site-resources.version>3.3</jbehave-site-resources.version>
+        <junit.version>4.12</junit.version>
+        <mockito-all.version>1.10.19</mockito-all.version>
+        <hamcrest-library.version>1.3</hamcrest-library.version>
+        <jbehave-core.version>3.8</jbehave-core.version>
+        <docker-java.version>3.0.6</docker-java.version>
+        <slf4j-log4j12.version>1.7.21</slf4j-log4j12.version>
+
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.apache.kafka</groupId>
+            <artifactId>kafka_2.11</artifactId>
+            <version>${kafka.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>${commons-lang3.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.101tec</groupId>
+            <artifactId>zkclient</artifactId>
+            <version>${zkclient.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest-library</artifactId>
+            <version>${hamcrest-library.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+            <version>${slf4j-log4j12.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jbehave.site</groupId>
+            <artifactId>jbehave-site-resources</artifactId>
+            <version>${jbehave-site-resources.version}</version>
+            <type>zip</type>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jbehave</groupId>
+            <artifactId>jbehave-core</artifactId>
+            <version>${jbehave-core.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jbehave</groupId>
+            <artifactId>jbehave-core</artifactId>
+            <version>${jbehave-core.version}</version>
+            <classifier>resources</classifier>
+            <type>zip</type>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-all</artifactId>
+            <version>${mockito-all.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.github.docker-java</groupId>
+            <artifactId>docker-java</artifactId>
+            <version>${docker-java.version}</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <archive>
+                        <manifestEntries>
+                            <serviceVersion>${project.version}</serviceVersion>
+                            <buildNumber>${build.number}</buildNumber>
+                        </manifestEntries>
+                    </archive>
+                    <descriptorRefs>
+                        <descriptorRef>jar-with-dependencies</descriptorRef>
+                    </descriptorRefs>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>${jdk.source}</source>
+                    <target>${jdk.target}</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>com.coderplus.maven.plugins</groupId>
+                <artifactId>copy-rename-maven-plugin</artifactId>
+                <version>1.0.1</version>
+                <executions>
+                    <execution>
+                        <id>rename-file</id>
+                        <phase>post-integration-test</phase>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                        <configuration>
+                            <sourceFile>src/test/resources/view/jbehave-logo.png</sourceFile>
+                            <destinationFile>${basedir}/target/jbehave/view/images/jbehave-logo.png</destinationFile>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+                <version>2.17</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>com.puppycrawl.tools</groupId>
+                        <artifactId>checkstyle</artifactId>
+                        <version>6.17</version>
+                    </dependency>
+                </dependencies>
+                <configuration>
+                    <encoding>UTF-8</encoding>
+                    <failOnViolation>false</failOnViolation>
+                    <configLocation>src/static-analysis/checkstyle/sun_checks.xml</configLocation>
+                    <suppressionsLocation>src/static-analysis/checkstyle/checkstyle-suppressions.xml
+                    </suppressionsLocation>
+                    <suppressionsFileExpression>checkstyle.suppressions.file</suppressionsFileExpression>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>validate</id>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>cobertura-maven-plugin</artifactId>
+                <version>2.7</version>
+                <configuration>
+                    <check></check>
+                    <instrumentation>
+                        <excludes>
+                            <exclude>com/mcafee/dxl/streaming/operations/client/examples/*.class</exclude>
+                        </excludes>
+                    </instrumentation>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>instrument</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.16</version>
+                <configuration>
+                    <!-- Disable unit tests -->
+                    <skip>false</skip>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.jbehave</groupId>
+                <artifactId>jbehave-maven-plugin</artifactId>
+                <version>3.8</version>
+                <executions>
+                    <execution>
+                        <id>unpack-view-resources</id>
+                        <phase>pre-integration-test</phase>
+                        <goals>
+                            <goal>unpack-view-resources</goal>
+                        </goals>
+                        <configuration>
+                            <scope>test</scope>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>run-stories-as-embedders</id>
+                        <phase>test</phase>
+                        <configuration>
+                            <scope>test</scope>
+                            <includes>
+                                <include>**/*Stories.java</include>
+                            </includes>
+                            <ignoreFailureInStories>false</ignoreFailureInStories>
+                            <ignoreFailureInView>true</ignoreFailureInView>
+                            <generateViewAfterStories>true</generateViewAfterStories>
+                            <skip>${skip.component.test}</skip>
+                            <metaFilters>
+                                <metaFilter>${meta.filter}</metaFilter>
+                                <metaFilter>-manual</metaFilter>
+                                <metaFilter>-ignored</metaFilter>
+                            </metaFilters>
+                        </configuration>
+                        <goals>
+                            <goal>run-stories-as-embeddables</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>log4j</groupId>
+                        <artifactId>log4j</artifactId>
+                        <version>1.2.17</version>
+                        <scope>compile</scope>
+                    </dependency>
+                </dependencies>
+            </plugin>
+        </plugins>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <artifactId>maven-assembly-plugin</artifactId>
+                    <configuration>
+                        <archive>
+                            <manifestEntries>
+                                <serviceVersion>${project.version}</serviceVersion>
+                                <buildNumber>${build.number}</buildNumber>
+                                <Created-By>McAfee</Created-By>
+                                <Built-By>McAfee</Built-By>
+                            </manifestEntries>
+                        </archive>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+
+    </build>
+
+
+</project>
