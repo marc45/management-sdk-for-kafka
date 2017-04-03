@@ -28,7 +28,7 @@ It is set of APIs packaged as JAR file, capable of being integrated by other Jav
 Java 1.8.0
 
 ## Usage
-[wiki](https://github-lvs.corpzone.internalzone.com/detect/dxlstream-management-sdk/wiki)
+[wiki](https://github.com/mcafee/management-sdk-for-kafka/wiki)
 
 ## Bugs and feedback
 
