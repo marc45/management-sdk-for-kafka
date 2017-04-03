@@ -32,7 +32,7 @@ Java 1.8.0
 
 ## Bugs and feedback
 
-For bugs, questions and discussions please use the [Github issues](https://github-lvs.corpzone.internalzone.com/detect/dxlstream-management-sdk/issues)
+For bugs, questions and discussions please use the [Github issues](https://github.com/mcafee/management-sdk-for-kafka/issues)
 
 ## Build
 ```
